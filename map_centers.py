@@ -16,4 +16,4 @@ m = folium.Map(location=(coordinate_center[0][0], coordinate_center[0][1]))
 for cor in coordinate_center:
         folium.Marker([cor[0], cor[1]], popup="<i>Center</i>", icon=folium.Icon(color='lightblue', icon='')).add_to(m)
 
-m.save("center.html")
+m.save("maps/center.html")

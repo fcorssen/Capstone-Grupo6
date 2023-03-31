@@ -16,9 +16,9 @@ for i in range(df_driver['latitude'].size):
 m = folium.Map(location=(coordinate_driver[0][0], coordinate_driver[0][1]))
 c = 1
 for cor in coordinate_driver:
-    if c < 10:
+    if c <= 10:
         folium.Marker([cor[0], cor[1]], popup="<i>Driver: Courier 1</i>", icon=folium.Icon(color='green', icon='')).add_to(m)
     if c > 10:
         folium.Marker([cor[0], cor[1]], popup="<i>Driver: Courier 2</i>", icon=folium.Icon(color='red', icon='')).add_to(m)
     c += 1
-m.save("driver.html")
+m.save("maps/driver.html")
