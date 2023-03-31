@@ -73,11 +73,14 @@ for cor in coordinate_eccomerce:
 
 
 # -------------- Agregar Recorrido ----------------
-points = [coordinate_driver[0]]
+points = []
 for i in range(30):
-     points.append(list(locations[i]))
+     points.append(list(coordinate_eccomerce[i]))
+sorted(points , key=lambda k: [k[1], k[0]])
+points.insert(0, coordinate_driver[0])
 points.append(coordinate_center[0])
-	
+
+
 folium.PolyLine(points, color="gray", weight=3, opacity=1).add_to(m)
 
 # ----- GUARDO TOD0 ------
