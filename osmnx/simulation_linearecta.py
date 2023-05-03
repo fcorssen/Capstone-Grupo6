@@ -28,10 +28,6 @@ for i in range(30):
     value = days.count(i + 1)
     amountDays.append(value)
 
-
-
-
-
 coordinate_center = [-33.4369436, -70.634449]
 # Creamos mapa
 m = folium.Map(location=(coordinate_center[0], coordinate_center[1]))
@@ -48,6 +44,7 @@ for j in range(len(list_driver)):
             if distance >= geopy.distance.geodesic(coordinate_center, [list_driver[i][1], list_driver[i][2]]).km:
                 distance = geopy.distance.geodesic(coordinate_center, [list_driver[i][1], list_driver[i][2]]).km
                 driver = [list_driver[i][1], list_driver[i][2]]
+    folium.CircleMarker(driver, color='blue', radius=5, fill=True).add_to(m)
     driver_order.append(driver)
 
 # --------- Generar data frame para dia 1 ----------
@@ -57,7 +54,7 @@ df_delivery_day = df_delivery_day[:amountDays[0]]
 # ------ Craer dataframe con suma de dimensiones y peso
 df_dim = df_delivery_day.groupby('e-commerce_id').agg({'dimensiones': ['count', 'sum'], 'weight (kg)': 'sum'})
 df_dim.columns = ['count', 'dimension', 'weight']
-
+print(df_dim)
 # ------- Crea lista con id del ecommerce y ubicacion
 list_cor = df_delivery_day[['e-commerce_id', 'latitude_ecommerce', 'longitude_ecommerce']].values.tolist()
 
@@ -75,29 +72,31 @@ for j in range(len(driver_order)):
     plot_route = []
     ecommerce_id = 0
 
-    distance = 10000000
+    distance = 100000000000
 
     for i in range(len(list_cor)):
-        if distance >= geopy.distance.geodesic([driver_order[j][0], driver_order[j][1]], [list_cor[i][1], list_cor[i][2]]).km:
-            distance = geopy.distance.geodesic([driver_order[j][0], driver_order[j][1]], [list_cor[i][1], list_cor[i][2]]).km
-            ecommerce_id = list_cor[i][0]
-
-        # Agregamos el punto al mapa
-        folium.Marker([list_cor[int(ecommerce_id) - 1][1], list_cor[int(ecommerce_id) - 1][2]], icon=DivIcon(
-                icon_size=(150,36), icon_anchor=(7,20), html=f'<div style="font-size: 18pt; color : black">{int(ecommerce_id)}</div>',
-                )).add_to(m)
+        if list_cor[i][0] not in ecommerce_visited:
+            if distance >= geopy.distance.geodesic([driver_order[j][0], driver_order[j][1]], [list_cor[i][1], list_cor[i][2]]).km:
+                distance = geopy.distance.geodesic([driver_order[j][0], driver_order[j][1]], [list_cor[i][1], list_cor[i][2]]).km
+                ecommerce_id = list_cor[i][0]
 
         # Agregamos punto a la ruta
     route.append(list_cor[int(ecommerce_id) - 1][0])
+    ecommerce_visited.append(list_cor[int(ecommerce_id) - 1][0])
+    
     plot_route.append([list_cor[int(ecommerce_id) - 1][1], list_cor[int(ecommerce_id) - 1][2]])
-    while len(route) < 10:
+    if j < 10:
+        n = 7
+    else:
+        n = 4
+    while len(route) < n:
 
-        distance = geopy.distance.geodesic([list_cor[0][1], list_cor[0][2]], [list_cor[int(route[-1]) - 1][1], list_cor[int(route[-1]) - 1][2]]).km
-        
+        distance = 100000
+
         # Guardamos la minima distancia entre los puntos
         for i in range(len(list_cor)):
             # Revisamos si el nodo ya esta en la ruta
-            if list_cor[i][0] not in route:
+            if list_cor[i][0] not in ecommerce_visited:
                 # print(f'i {i} ----  Distance {distance} ---- newD { geopy.distance.geodesic([list_cor[i][1], list_cor[i][2]], [list_cor[i][1], list_cor[i][2]]).km}')
                 if distance >= geopy.distance.geodesic([list_cor[int(route[-1]) - 1][1], list_cor[int(route[-1]) - 1][2]], [list_cor[i][1], list_cor[i][2]]).km:
                     distance = geopy.distance.geodesic([list_cor[int(route[-1]) - 1][1], list_cor[int(route[-1]) - 1][2]], [list_cor[i][1], list_cor[i][2]]).km
@@ -105,76 +104,25 @@ for j in range(len(driver_order)):
         
         # Add to route 
         route.append(list_cor[int(ecommerce_id) - 1][0])
+        ecommerce_visited.append(list_cor[int(ecommerce_id) - 1][0])
         plot_route.append([list_cor[int(ecommerce_id) - 1][1], list_cor[int(ecommerce_id) - 1][2]])
-        # Agregamos el ecommerce al mapa
-        folium.Marker([list_cor[int(ecommerce_id) - 1][1], list_cor[int(ecommerce_id) - 1][2]], icon=DivIcon(
-            icon_size=(150,36), icon_anchor=(7,20), html=f'<div style="font-size: 18pt; color : black">{list_cor[int(ecommerce_id) - 1][0]}</div>',
-            )).add_to(m)
-   
 
-    break
-print(route)
-folium.PolyLine(plot_route, color="red", weight=1.5, opacity=1).add_to(m)
+    route_drivers.append(route)
+    route_drivers_plot.append(plot_route)   
+
+# print(route_drivers)
+# print(route_drivers_plot)
+for i in range(len(route_drivers)):
+    for j in range(len(route_drivers[i])):
+        pos = int(route_drivers[i][j])
+        # Agregamos el punto al mapa
+        folium.Marker([list_cor[pos-1][1], list_cor[pos-1][2]], icon=DivIcon(
+                icon_size=(150,36), icon_anchor=(7,20), html=f'<div style="font-size: 18pt; color : black">{pos}</div>',
+                )).add_to(m)
+        for k in range(len(route_drivers_plot)):
+            plot = route_drivers_plot[k]
+            folium.PolyLine(plot, color="red", weight=1.5, opacity=1).add_to(m)
+
+# folium.PolyLine(plot_route, color="red", weight=1.5, opacity=1).add_to(m)
 m.save("osmnx/aa.html")
 
-# while len(list_driver)  != 0:
-    
-#     if len(list_driver) == 18:
-#         driver, list_driver2 = driver_min_distance(coordinate_center, list_driver)
-#     else:
-#         driver, list_driver2 = driver_min_distance(coordinate_center, list_driver2)
-#     print('aaaaaaaa',len(list_driver))
-#     print(driver)
-
-#     # Agregamos el punto al mapa
-#     folium.CircleMarker([list_driver[driver][1], list_driver[driver][2]], color='blue', radius=5, fill=True).add_to(m)
-
-#     distance = geopy.distance.geodesic([list_driver[driver][1], list_driver[driver][2]], [list_cor[0][1], list_cor[0][2]]).km
-
-#     route = []
-#     plot_route = []
-#     ecommerce_id = 0
-
-#     for i in range(len(list_cor)):
-#         if distance >= geopy.distance.geodesic([list_driver[driver][1], list_driver[driver][2]], [list_cor[i][1], list_cor[i][2]]).km:
-#             distance = geopy.distance.geodesic([list_driver[driver][1], list_driver[driver][2]], [list_cor[i][1], list_cor[i][2]]).km
-#             ecommerce_id = list_cor[i][0]
-
-#     # Agregamos el punto al mapa
-#     folium.Marker([list_cor[int(ecommerce_id) - 1][1], list_cor[int(ecommerce_id) - 1][2]], icon=DivIcon(
-#             icon_size=(150,36), icon_anchor=(7,20), html=f'<div style="font-size: 18pt; color : black">{int(ecommerce_id)}</div>',
-#             )).add_to(m)
-    
-#     route.append(list_cor[int(ecommerce_id) - 1][0])
-#     ecommerce_visited.append(list_cor[int(ecommerce_id) - 1][0])
-#     plot_route.append([list_cor[int(ecommerce_id) - 1][1], list_cor[int(ecommerce_id) - 1][2]])
-    
-#     while len(route) < 10:
-
-#         distance = geopy.distance.geodesic([list_cor[0][1], list_cor[0][2]], [list_cor[int(route[-1]) - 1][1], list_cor[int(route[-1]) - 1][2]]).km
-        
-#         # Guardamos la minima distancia entre los puntos
-#         for i in range(len(list_cor)):
-#             # Revisamos si el nodo ya esta en la ruta
-#             if list_cor[i][0] not in ecommerce_visited:
-#                 # print(f'i {i} ----  Distance {distance} ---- newD { geopy.distance.geodesic([list_cor[i][1], list_cor[i][2]], [list_cor[i][1], list_cor[i][2]]).km}')
-#                 if distance >= geopy.distance.geodesic([list_cor[int(route[-1]) - 1][1], list_cor[int(route[-1]) - 1][2]], [list_cor[i][1], list_cor[i][2]]).km:
-#                     distance = geopy.distance.geodesic([list_cor[int(route[-1]) - 1][1], list_cor[int(route[-1]) - 1][2]], [list_cor[i][1], list_cor[i][2]]).km
-#                     ecommerce_id = list_cor[i][0]
-        
-#         # Add to route 
-#         route.append(list_cor[int(ecommerce_id) - 1][0])
-#         ecommerce_visited.append(list_cor[int(ecommerce_id) - 1][0])
-#         plot_route.append([list_cor[int(ecommerce_id) - 1][1], list_cor[int(ecommerce_id) - 1][2]])
-#         # Agregamos el ecommerce al mapa
-#         folium.Marker([list_cor[int(ecommerce_id) - 1][1], list_cor[int(ecommerce_id) - 1][2]], icon=DivIcon(
-#             icon_size=(150,36), icon_anchor=(7,20), html=f'<div style="font-size: 18pt; color : black">{list_cor[int(ecommerce_id) - 1][0]}</div>',
-#             )).add_to(m)
-
-#     # folium.PolyLine(plot_route, color="red", weight=1.5, opacity=1).add_to(m)
-#     # m.save("osmnx/aa.html")
-#     route_drivers.append(route)
-#     route_drivers_plot.append(plot_route)
-#     # break
-
-# print(ecommerce_visited)
