@@ -159,5 +159,5 @@ for k in range(len(route_drivers_plot)):
         if i != len(plot)-1:
             distance += geopy.distance.geodesic(plot[i], plot[i+1]).km
 print(distance)
-m.save("osmnx/aa.html")
+m.save("osmnx/maps/linea_recta_ecommerce.html")
 

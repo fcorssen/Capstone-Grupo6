@@ -74,8 +74,6 @@ route.append(list_cor[int(ecommerce_id) - 1][0])
 plot_route.append([list_cor[int(ecommerce_id) - 1][1], list_cor[int(ecommerce_id) - 1][2]])
 
 
-i = 0
-
 while len(route) < 10:
 
     distance = geopy.distance.geodesic([list_cor[0][1], list_cor[0][2]], [list_cor[int(route[-1]) - 1][1], list_cor[int(route[-1]) - 1][2]]).km
@@ -102,5 +100,5 @@ while len(route) < 10:
 print(route)
 print(plot_route)
 folium.PolyLine(plot_route, color="red", weight=1.5, opacity=1).add_to(m)
-m.save("osmnx/linea_recta.html")
+m.save("osmnx/maps/linea_recta.html")
 
