@@ -77,6 +77,7 @@ for j in range(len(driver_order)):
     delivery_id = 0
 
     distance = 100000000000
+    plot_route.append(coor_center)
 
     for i in range(len(list_delivery)):
         if list_delivery[i][0] not in delivery_visited:
