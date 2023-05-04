@@ -33,6 +33,10 @@ coordinate_center = [-33.4369436, -70.634449]
 m = folium.Map(location=(coordinate_center[0], coordinate_center[1]))
 folium.CircleMarker(coordinate_center, color='red', radius=5, fill=True).add_to(m)
 
+# ----- Obtenemos coordenadas de centro de distribucion ------------
+coor_center = df_center.values.tolist()[-1][1:]
+
+# --------- Ordenamos los driver por cercania a un punto ------------------- 
 list_driver = df_driver.values.tolist()
 driver_order = []
 driver_id_order = []
@@ -66,6 +70,8 @@ list_cor = df_delivery_day[['e-commerce_id', 'latitude_ecommerce', 'longitude_ec
 # ---- Elimimno los ecommerce repetidos ----------- 
 list_cor.sort()
 list_cor = list(list_cor for list_cor,_ in itertools.groupby(list_cor))
+
+# ----------- Comienza simulacion --------------
 
 ecommerce_visited = []
 route_drivers = []
@@ -127,6 +133,7 @@ for j in range(len(driver_order)):
         # Sumamos peso y dimensiones
         weight += list_dim[int(ecommerce_id) - 1][2]
         dim += list_dim[int(ecommerce_id) - 1][1]
+    plot_route.append(coor_center)
 
     route_drivers.append(route)
     route_drivers_plot.append(plot_route)   
@@ -144,5 +151,13 @@ for i in range(len(route_drivers)):
             plot = route_drivers_plot[k]
             folium.PolyLine(plot, color="red", weight=1.5, opacity=1).add_to(m)
 
+# Sumamos la distancia total
+distance = 0
+for k in range(len(route_drivers_plot)):
+    plot = route_drivers_plot[k]
+    for i in range(len(plot)):
+        if i != len(plot)-1:
+            distance += geopy.distance.geodesic(plot[i], plot[i+1]).km
+print(distance)
 m.save("osmnx/aa.html")
 
