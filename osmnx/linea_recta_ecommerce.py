@@ -161,3 +161,9 @@ for k in range(len(route_drivers_plot)):
 print(distance)
 m.save("osmnx/maps/linea_recta_ecommerce.html")
 
+with open(r'osmnx/txt/ruta_ecommerce.txt', 'w') as fp:
+    for k in range(len(route_drivers_plot)):
+        plot = route_drivers_plot[k]
+        for route in plot:
+            fp.write("%s " % route)
+        fp.write("\n")
