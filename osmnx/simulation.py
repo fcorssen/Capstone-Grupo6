@@ -49,6 +49,7 @@ G = ox.add_edge_travel_times(G)
 
 # # ---------- Generar ruta ------------
 driver_route = []
+total_lenght = 0
 # ecommerce = random.choice(coordinate_eccomerce)
 ecommerce = random.sample(coordinate_eccomerce, 20)
 
@@ -65,6 +66,9 @@ for i in range(len(ecommerce)):
         closest = i
 ecommerce_ini = ecommerce[closest]
 ecommerce.pop(closest)
+edge_lengths = ox.utils_graph.get_route_edge_attributes(
+    G, route_distance, 'length') 
+total_lenght += sum(edge_lengths)
 
 
 driver_route.append(route_distance)
@@ -83,28 +87,30 @@ while (len(driver_route) < 17):
         for i in range(len(ecommerce)):
             destination_node2 = ox.distance.nearest_nodes(G, ecommerce[i][1], ecommerce[i][0])
 
-            if route_distance2 > nx.shortest_path(G, destination_node1, destination_node2, weight='distance'):
+            if route_distance2 >= nx.shortest_path(G, destination_node1, destination_node2, weight='distance'):
                 route_distance2 = nx.shortest_path(G, destination_node1, destination_node2, weight='distance')
                 destination_node1 = destination_node2
                 closest = i
-        
-        print(closest, ecommerce)
-        
+                
         ecommerce1 = ecommerce[closest]
         ecommerce.pop(closest)
         driver_route.append(route_distance2)
-        print(ecommerce1)
-        print(ecommerce)
-        print()
+        print(f'El nodo mas cerca de {j} es {closest}')
         j+=1
+        edge_lengths = ox.utils_graph.get_route_edge_attributes(
+            G, route_distance2, 'length') 
+        total_lenght += sum(edge_lengths)  
     except nx.NetworkXNoPath:
         print('No path')
     
 
 # ox.save_load.save_graph_osm(G, filename='test.osm')
-fig, ax = ox.plot_graph_routes(G, driver_route, route_linewidth=6, node_size=0)
+rc = ['r', 'y', 'c', 'r', 'y', 'c', 'r', 'y', 'c', 'r', 'y', 'c', 'r', 'y', 'c', 'r', 'y']
+fig, ax = ox.plot_graph_routes(G, driver_route, route_colors=rc, route_linewidth=6, node_size=0)
 
 
+print()
+print('Total Length', total_lenght/1000)
 # print(len(driver_route))
 # print(driver_route)
 
