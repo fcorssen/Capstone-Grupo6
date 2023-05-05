@@ -138,8 +138,7 @@ for j in range(len(driver_order)):
     route_drivers.append(route)
     route_drivers_plot.append(plot_route)   
 
-# print(route_drivers)
-# print(route_drivers_plot)
+
 for i in range(len(route_drivers)):
     for j in range(len(route_drivers[i])):
         pos = int(route_drivers[i][j])
