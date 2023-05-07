@@ -6,6 +6,9 @@ import random
 import itertools
 import folium
 from folium.features import DivIcon
+from copy import deepcopy
+
+random.seed(343545)
 
 route_drivers_ecommerce = [
     [[-33.42475869783682, -70.61891438686266], [-33.42225103306093, -70.62423686702182], [-33.41804072178575, -70.63004838032934], [-33.41959484504883, -70.63717244522564], [-33.41906417517651, -70.64188176896492], [-33.42371884079868, -70.64125894640664], [-33.42507612353619, -70.64258599831957], [-33.42691073042271, -70.64415831944888], [-33.4539817210464, -70.61069318480818]],
@@ -37,20 +40,19 @@ def calculate_distance(list_route):
                 distance += geopy.distance.geodesic(plot[i], plot[i+1]).km
     return distance
 
-def min_route(list_r):
+def min_route(list_r, driver):
     list_route = list_r
     visited = []
     route = []
     node_visited = []
     pos = 0
     distance = 10000000
-    driver = list_route[0]
-    bodega = list_route[-1]
-    list_route.pop(0)
-    list_route.pop(-1)
+    # driver = list_route[0]
+    # bodega = list_route[-1]
+    # list_route.pop(0)
+    # list_route.pop(-1)
 
-    route.append(driver)
-
+    # route.append(driver)
     for i in range(len(list_route)):
         if distance >= geopy.distance.geodesic(driver, [list_route[i][0], list_route[i][1]]).km:
             distance = geopy.distance.geodesic(driver, [list_route[i][0], list_route[i][1]]).km
@@ -73,29 +75,79 @@ def min_route(list_r):
         route.append(list_route[pos])
         node_visited.append(pos)
 
-    route.append(bodega)
+    # route.append(bodega)
     return route
 
+
+
+# Guardo la mejor ruta y distancia
+route_drivers_ecommerce_best =deepcopy(route_drivers_ecommerce)
 best_distance = calculate_distance(route_drivers_ecommerce)
 
-# Elijo los puntos a cambiar
-change = route_drivers_ecommerce[0][2]
-route_drivers_ecommerce[1].insert(-1, change)
-route_drivers_ecommerce[0].pop(2)
 
-# Entrega nuevas listas con la minima distancia
-route1 = min_route(route_drivers_ecommerce[1])
-route6 = min_route(route_drivers_ecommerce[0])
+for i in range(10000):
+    
+    try:
+        driver_take = random.randint(0, len(route_drivers_ecommerce) - 1)
+        driver_give = random.randint(0, len(route_drivers_ecommerce) - 1)
+
+        # Asegurarse que son distinto drivers
+        while driver_take == driver_give:
+            driver_take = random.randint(0, len(route_drivers_ecommerce) - 1)
+            driver_give = random.randint(0, len(route_drivers_ecommerce) - 1)
 
 
-# Cambio las lista por las nuevas y elimino las viejas
-route_drivers_ecommerce.pop(1)
-route_drivers_ecommerce.insert(1, route1)
-route_drivers_ecommerce.pop(0)
-route_drivers_ecommerce.insert(0, route6)
+        if len(route_drivers_ecommerce[driver_take]) > 2:
+            
+            # Posicion que se cambia
+            pos_change = random.randint(1, len(route_drivers_ecommerce[driver_take]) - 2)
+
+            # Guardo el punto a cambiar, lo elimino de un driver y lo inserto en otro
+            value_change = route_drivers_ecommerce[driver_take][pos_change]
+            route_drivers_ecommerce[driver_give].insert(-1, value_change)
+            route_drivers_ecommerce[driver_take].pop(pos_change)
+
+        #     # Entrega nuevas listas con la minima distancia
+            bodega = route_drivers_ecommerce[driver_take][-1]
+            driver_take_coor = route_drivers_ecommerce[driver_take][0]
+            driver_give_coor = route_drivers_ecommerce[driver_give][0]
+
+            if len(route_drivers_ecommerce[driver_take][1:-1]) > 2:
+                route_take = min_route(route_drivers_ecommerce[driver_take][1:-1], driver_take_coor)
+                # Agregamos la direccion del driver y bodega
+                route_take.insert(0, driver_take_coor)
+                route_take.append(bodega)
+            else:
+                route_take = route_drivers_ecommerce[driver_take]
+            if len(route_drivers_ecommerce[driver_give][1:-1]) > 2: 
+                route_give = min_route(route_drivers_ecommerce[driver_give][1:-1], driver_give_coor)
+                route_give.insert(0, driver_give_coor)
+                route_give.append(bodega)
+            else:
+                route_give = route_drivers_ecommerce[driver_give]
+        
+            # Cambio las lista por las nuevas y elimino las viejas
+            route_drivers_ecommerce.pop(driver_take)
+            route_drivers_ecommerce.insert(driver_take, route_take)
+            route_drivers_ecommerce.pop(driver_give) 
+            route_drivers_ecommerce.insert(driver_give, route_give)
+
+            new_distance = calculate_distance(route_drivers_ecommerce)
+
+            if new_distance <= best_distance:
+                print('--------------------------')
+                print(f'Mejor distancia ahora {new_distance} antes {best_distance}')
+                print('--------------------------')
+                best_distance = new_distance
+                route_drivers_ecommerce_best = deepcopy(route_drivers_ecommerce)
+            else:
+                route_drivers_ecommerce = deepcopy(route_drivers_ecommerce_best)
+
+    except:
+        print("El driver ya no tiene ruta")
+
 
 print(best_distance)
-print(calculate_distance(route_drivers_ecommerce))
 
 # Escribo en txt
 with open(r'osmnx/txt/ruta_ecommerce_VEERR.txt', 'w') as fp:
@@ -104,3 +156,14 @@ with open(r'osmnx/txt/ruta_ecommerce_VEERR.txt', 'w') as fp:
         for route in plot:
             fp.write("%s " % route)
         fp.write("\n")
+
+coordinate_center = [-33.4369436, -70.634449]
+# Creamos mapa
+m = folium.Map(location=(coordinate_center[0], coordinate_center[1]))
+folium.CircleMarker(coordinate_center, color='red', radius=5, fill=True).add_to(m)
+
+for k in range(len(route_drivers_ecommerce_best)):
+    plot = route_drivers_ecommerce_best[k]
+    folium.PolyLine(plot, color="red", weight=1.5, opacity=1).add_to(m)
+
+m.save("osmnx/maps/linea_recta_ecommerce_mejorado.html")
