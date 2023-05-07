@@ -71,4 +71,4 @@ for cor in coordinate_eccomerce:
 
 
 # ----- GUARDO TOD0 ------
-m.save("mapsCode/maps/mapDay.html")
+m.save("mapsCode/maps/mapDay2.html")
