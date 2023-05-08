@@ -10,6 +10,138 @@ from copy import deepcopy
 
 random.seed(343545)
 
+peso_maximo = 450
+volumen_maximo = 2
+
+class Driver:
+    def __init__(self, id, origen, ubicacion_actual):
+        self.id = id
+        self.peso_max = 450
+        self.peso = 0
+        self.volumen_max = 2
+        self.volumen = 0
+        self.origen = origen
+        self.ruta = []
+        self.ubicaion_actual = []
+
+    def agregar_ecommerce(self, ecommerce):
+        self.peso += ecommerce.peso
+        self.volumen += ecommerce.volumen
+        self.ruta.append(ecommerce.ubicacion)
+        self.ubicacion_actual = ecommerce.ubicacion
+    
+    def eliminar_ecommerce(self, ecommerce):
+        self.peso -= ecommerce.peso
+        self.volumen -= ecommerce.volumen
+        self.ruta.remove(ecommerce.ubicacion)
+        self.ubicacion_actual = ecommerce.ubicacion
+
+
+class Ecommerce:
+    def __init__(self, id, ubicacion):
+        self.id = id
+        self.peso = 0
+        self.volumen = 0
+        self.ubicacion = ubicacion
+        self.paquetes = []
+        self.recogido = False
+
+    def agregar_paquete(self, paquete):
+        self.paquetes.append(paquete)
+        self.peso += paquete.peso
+        self.volumen += paquete.volumen
+    
+    def eliminar_paquete(self, paquete):
+        self.paquetes.remove(paquete)
+        self.peso -= paquete.peso
+        self.volumen -= paquete.volumen
+    
+    def recoger(self):
+        self.recogido = True
+
+class Paquete:
+    def __init__(self, id, peso, destino, x1,x2,x3, delivery_day, ecommerce):
+        self.id = id
+        self.peso = peso
+        self.x1 = x1 / 100
+        self.x2 = x2 / 100
+        self.x3 = x3 / 100
+        self.volumen = self.x1*self.x2*self.x3
+        self.destino = destino
+        self.dia = delivery_day
+        self.ecommerce = ecommerce
+
+class Centro:
+    def __init__(self, id, ubicacion):
+        self.id = id
+        self.ubicacion = ubicacion
+
+
+# ------------- Cargar los datos --------------
+
+df_delivery = pd.read_excel("datos/deliveries_data.xlsx")
+df_driver = pd.read_excel("datos/driver_origins_data.xlsx")
+df_center = pd.read_excel("datos/centers_data.xlsx")
+df_ecommerce = pd.read_excel("datos/e-commerce_data.xlsx")
+
+
+# # ------------- Separar por dias --------------
+days = []
+amountDays = []
+
+for i in range(df_delivery['delivery_day'].size):
+    days.append(df_delivery['delivery_day'].iat[i].day)
+
+for i in range(30):
+    value = days.count(i + 1)
+    amountDays.append(value)
+
+coordinate_center = [-33.4369436, -70.634449]
+
+
+# instanciar los centros
+
+centros = []
+for i in range(df_center['id'].size):
+    centro = Centro(df_center['id'].iat[i], [df_center['latitude'].iat[i], df_center['longitude'].iat[i]])
+    centros.append(centro)
+
+# instanciar los drivers 
+
+drivers = []
+for i in range(df_driver['id'].size):
+    driver = Driver(df_driver['id'].iat[i], df_driver['latitude'].iat[i], df_driver['longitude'].iat[i])
+    drivers.append(driver)
+
+# instanciar los ecommerce
+
+ecommerces = []
+for i in range(df_ecommerce['id'].size):
+    ecommerce = Ecommerce(df_ecommerce['id'].iat[i], [df_ecommerce['latitude'].iat[i], df_ecommerce['longitude'].iat[i]])
+    ecommerces.append(ecommerce)
+
+# instanciar los paquetes
+
+paquetes = []
+for i in range(df_delivery['id'].size):
+    paquete = Paquete(df_delivery['id'].iat[i], df_delivery['weight (kg)'].iat[i], [df_delivery['latitude'].iat[i], df_delivery['longitude'].iat[i]], df_delivery['x1 (largo en cm)'].iat[i], df_delivery['x2 (ancho en cm)'].iat[i], df_delivery['x3 (alto en cm)'].iat[i], df_delivery['delivery_day'].iat[i].day, df_delivery['e-commerce_id'].iat[i])
+    paquetes.append(paquete)
+
+
+# paquetes dia 1
+
+paquetes_dia_1 = paquetes[:amountDays[0]]   
+
+# -------------------------------------------------------------------------
+
+# Agregar paquetes a los ecommerce para el dia 1
+
+for paquete in paquetes_dia_1:
+    for ecommerce in ecommerces:
+        if paquete.ecommerce == ecommerce.id:
+            ecommerce.agregar_paquete(paquete)
+
+# -------------------------------------------------------------------------
 
 route_drivers_ecommerce = [
     [[-33.42475869783682, -70.61891438686266], [-33.42225103306093, -70.62423686702182], [-33.41804072178575, -70.63004838032934], [-33.41959484504883, -70.63717244522564], [-33.41906417517651, -70.64188176896492], [-33.42371884079868, -70.64125894640664], [-33.42507612353619, -70.64258599831957], [-33.42691073042271, -70.64415831944888], [-33.4539817210464, -70.61069318480818]],
@@ -32,139 +164,33 @@ route_drivers_ecommerce = [
     [[-33.59470558033697, -70.70209182052085], [-33.37975999558638, -70.63581892182225], [-33.34537910208673, -70.63071147700214], [-33.32761600207031, -70.6096126339093], [-33.27097821915391, -70.68667313279227], [-33.4539817210464, -70.61069318480818]],
 ]
 
-def calculate_distance(list_route):
-    distance = 0
-    for k in range(len(list_route)):
-        plot = list_route[k]
-        for i in range(len(plot)):
-            if i != len(plot)-1:
-                distance += geopy.distance.geodesic(plot[i], plot[i+1]).km
-    return distance
 
-def min_route(list_r, driver):
-    list_route = list_r
-    visited = []
+
+route_driver_class = []
+
+
+for route_driver in route_drivers_ecommerce:
     route = []
-    node_visited = []
-    pos = 0
-    distance = 10000000
-    # driver = list_route[0]
-    # bodega = list_route[-1]
-    # list_route.pop(0)
-    # list_route.pop(-1)
+    for i in range(len(route_driver)):
+        if i == 0:
+            for j in range(len(drivers)):
+                if route_driver[i][0] == drivers[j].origen:
+                    route.append(drivers[j])
+        if i == len(route_driver) - 1:
+            for k in range(len(centros)):
+                if route_driver[i] == centros[k].ubicacion:
+                    route.append(centros[k])
+        for e in range(len(route_driver[i])):
+            for w in range(len(ecommerces)):
+                if route_driver[i] == ecommerces[w].ubicacion:
+                    route.append(ecommerces[w])
+    route_driver_class.append(route)
 
-    # route.append(driver)
-    for i in range(len(list_route)):
-        if distance >= geopy.distance.geodesic(driver, [list_route[i][0], list_route[i][1]]).km:
-            distance = geopy.distance.geodesic(driver, [list_route[i][0], list_route[i][1]]).km
-            pos = i
-    visited.append(list_route[pos][0])
-    list_route[pos][0]
-    node_visited.append(pos)
-    route.append(list_route[pos])
-
-
-    while len(visited) < len(list_route):
-        distance = 1000000
-        
-        for i in range(len(list_route)):
-            if list_route[i][0] not in visited:
-                if distance >= geopy.distance.geodesic([list_route[node_visited[-1]][0], list_route[node_visited[-1]][1]], [list_route[i][0], list_route[i][1]]).km:
-                    distance = geopy.distance.geodesic([list_route[node_visited[-1]][0], list_route[node_visited[-1]][1]], [list_route[i][0], list_route[i][1]]).km
-                    pos = i
-        visited.append(list_route[pos][0])
-        route.append(list_route[pos])
-        node_visited.append(pos)
-
-    # route.append(bodega)
-    return route
-
-
-
-# Guardo la mejor ruta y distancia
-route_drivers_ecommerce_best =deepcopy(route_drivers_ecommerce)
-best_distance = calculate_distance(route_drivers_ecommerce)
-
-
-for i in range(10000):
-    
-    try:
-        driver_take = random.randint(0, len(route_drivers_ecommerce) - 1)
-        driver_give = random.randint(0, len(route_drivers_ecommerce) - 1)
-
-        # Asegurarse que son distinto drivers
-        while driver_take == driver_give:
-            driver_take = random.randint(0, len(route_drivers_ecommerce) - 1)
-            driver_give = random.randint(0, len(route_drivers_ecommerce) - 1)
-
-
-        if len(route_drivers_ecommerce[driver_take]) > 2:
-            
-            # Posicion que se cambia
-            pos_change = random.randint(1, len(route_drivers_ecommerce[driver_take]) - 2)
-
-            # Guardo el punto a cambiar, lo elimino de un driver y lo inserto en otro
-            value_change = route_drivers_ecommerce[driver_take][pos_change]
-            route_drivers_ecommerce[driver_give].insert(-1, value_change)
-            route_drivers_ecommerce[driver_take].pop(pos_change)
-
-        #     # Entrega nuevas listas con la minima distancia
-            bodega = route_drivers_ecommerce[driver_take][-1]
-            driver_take_coor = route_drivers_ecommerce[driver_take][0]
-            driver_give_coor = route_drivers_ecommerce[driver_give][0]
-
-            if len(route_drivers_ecommerce[driver_take][1:-1]) > 2:
-                route_take = min_route(route_drivers_ecommerce[driver_take][1:-1], driver_take_coor)
-                # Agregamos la direccion del driver y bodega
-                route_take.insert(0, driver_take_coor)
-                route_take.append(bodega)
-            else:
-                route_take = route_drivers_ecommerce[driver_take]
-            if len(route_drivers_ecommerce[driver_give][1:-1]) > 2: 
-                route_give = min_route(route_drivers_ecommerce[driver_give][1:-1], driver_give_coor)
-                route_give.insert(0, driver_give_coor)
-                route_give.append(bodega)
-            else:
-                route_give = route_drivers_ecommerce[driver_give]
-        
-            # Cambio las lista por las nuevas y elimino las viejas
-            route_drivers_ecommerce.pop(driver_take)
-            route_drivers_ecommerce.insert(driver_take, route_take)
-            route_drivers_ecommerce.pop(driver_give) 
-            route_drivers_ecommerce.insert(driver_give, route_give)
-
-            new_distance = calculate_distance(route_drivers_ecommerce)
-
-            if new_distance <= best_distance:
-                print('--------------------------')
-                print(f'Mejor distancia ahora {new_distance} antes {best_distance}')
-                print('--------------------------')
-                best_distance = new_distance
-                route_drivers_ecommerce_best = deepcopy(route_drivers_ecommerce)
-            else:
-                route_drivers_ecommerce = deepcopy(route_drivers_ecommerce_best)
-
-    except:
-        print("El driver ya no tiene ruta")
-
-
-print(best_distance)
-
-# Escribo en txt
-with open(r'osmnx/txt/ruta_ecommerce_VEERR.txt', 'w') as fp:
-    for k in range(len(route_drivers_ecommerce)):
-        plot = route_drivers_ecommerce[k]
-        for route in plot:
-            fp.write("%s " % route)
-        fp.write("\n")
-
-coordinate_center = [-33.4369436, -70.634449]
-# Creamos mapa
-m = folium.Map(location=(coordinate_center[0], coordinate_center[1]))
-folium.CircleMarker(coordinate_center, color='red', radius=5, fill=True).add_to(m)
-
-for k in range(len(route_drivers_ecommerce_best)):
-    plot = route_drivers_ecommerce_best[k]
-    folium.PolyLine(plot, color="red", weight=1.5, opacity=1).add_to(m)
-
-m.save("osmnx/maps/linea_recta_ecommerce_mejorado.html")
+print(len(route_driver_class))
+for route in route_driver_class:
+    dimension = 0
+    for i in range(1, len(route)-1):
+        dimension += route[i].volumen
+    if dimension > 2:
+        print("se excede")
+    print(dimension)
