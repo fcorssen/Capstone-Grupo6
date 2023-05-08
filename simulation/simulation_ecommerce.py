@@ -4,6 +4,7 @@ import random
 import folium
 from folium.features import DivIcon
 from clases import Driver, Paquete, Ecommerce, Centro
+from funciones import distancia_total, min_route
 
 
 # ------------- Cargar los datos --------------
@@ -85,7 +86,7 @@ for j in range(len(drivers)):
 drivers = driver_order
 
 
-# -------- Comienzamos a simular ---------- 
+# -------- Comenzamos a simular ---------- 
 ecommerce_visited = []
 centro = centros[3].ubicacion
 
@@ -136,12 +137,7 @@ for i in range(len(drivers)):
     folium.PolyLine(drivers[i].ruta, color="red", weight=1.5, opacity=1).add_to(m)
 
 # ------------- Sumamos la distancia total ------------
-distance = 0
-for i in range(len(drivers)):
-    for j in range(len(drivers[i].ruta)):
-        if j != len(drivers[i].ruta) - 1:
-            distance += geopy.distance.geodesic(drivers[i].ruta[j], drivers[i].ruta[j+1]).km
-print(distance)
+print(distancia_total(drivers))
 
 m.save("simulation/maps/ecommerce.html")
 
