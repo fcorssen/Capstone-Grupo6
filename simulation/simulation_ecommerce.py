@@ -4,7 +4,7 @@ import random
 import folium
 from folium.features import DivIcon
 from clases import Driver, Paquete, Ecommerce, Centro
-from funciones import distancia_total, min_route
+from funciones import calculate_distance, improve_route_aleatory, map_distance
 
 
 # ------------- Cargar los datos --------------
@@ -137,7 +137,7 @@ for i in range(len(drivers)):
     folium.PolyLine(drivers[i].ruta, color="red", weight=1.5, opacity=1).add_to(m)
 
 # ------------- Sumamos la distancia total ------------
-print(distancia_total(drivers))
+print(calculate_distance(drivers))
 
 m.save("simulation/maps/ecommerce.html")
 
@@ -146,3 +146,11 @@ with open(r'simulation/txt/ruta_ecommerce.txt', 'w') as fp:
     for driver in drivers:
         fp.write("%s " % driver.ruta)
         fp.write("\n")
+
+best_distance = calculate_distance(drivers)
+# print(best_distance)
+
+driver_improve = improve_route_aleatory(drivers, best_distance)
+
+map_distance(driver_improve)
+
