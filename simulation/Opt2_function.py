@@ -6,15 +6,14 @@ def distance(value1, value2):
 def opt2(tour):
     n = len(tour) - 1
     tour_edges = [(tour[i], tour[i+1]) for i in range(n)]
-
     improved = True
 
     while improved:
         
         improved = False
 
-        for i in range(1, n):
-            for j in range(i+1, n - 1):
+        for i in range(n):
+            for j in range(i+1, n):
 
                 # current node
                 cur1 = (tour[i], tour[i+1])
