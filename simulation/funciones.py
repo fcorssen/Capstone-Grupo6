@@ -1,11 +1,14 @@
 import geopy.distance
 import random
+import numpy as np
 from copy import deepcopy
 import folium
 from folium.features import DivIcon
+import matplotlib.cm as cm
+import matplotlib.colors as cl
 
 
-random.seed(343545)
+# random.seed(343545)
 
 def calculate_distance(drivers):
     distance = 0
@@ -141,3 +144,11 @@ def map_distance(drivers):
     m.save("simulation/maps/ecommerce_improve.html")
 
 
+def generate_colors(n):
+    # Generate color palette for coordinates
+    colors = cm.rainbow(np.linspace(0, 1, n))
+    colors_new = []
+    for el in colors:
+        hex = cl.to_hex(el)
+        colors_new += [hex]
+    return colors_new

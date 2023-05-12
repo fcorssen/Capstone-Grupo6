@@ -4,7 +4,7 @@ import random
 import folium
 from folium.features import DivIcon
 from clases import Driver, Paquete, Ecommerce, Centro
-from funciones import calculate_distance, improve_route_aleatory, map_distance
+from funciones import calculate_distance, improve_route_aleatory, map_distance, generate_colors
 
 
 # ------------- Cargar los datos --------------
@@ -85,6 +85,7 @@ for j in range(len(drivers)):
 
 drivers = driver_order
 
+drivers.reverse()
 
 # -------- Comenzamos a simular ---------- 
 ecommerce_visited = []
@@ -129,17 +130,24 @@ for j in range(len(drivers)):
     drivers[j].ruta.insert(0, drivers[j].origen)
     drivers[j].ruta.append(centro)
 
+# ----- Generamos los colores --------
+colors = generate_colors(len(drivers))
+
 # ------ Graficamos los puntos --------------
 for i in range(len(drivers)):
     folium.Marker(drivers[i].origen, icon=DivIcon(
                 icon_size=(150,36), icon_anchor=(7,20), html=f'<div style="font-size: 18pt; color : black">{i + 1}</div>',
                 )).add_to(m)
-    folium.PolyLine(drivers[i].ruta, color="red", weight=1.5, opacity=1).add_to(m)
+    folium.PolyLine(drivers[i].ruta, color=colors[i], weight=3, opacity=1).add_to(m)
 
 # ------------- Sumamos la distancia total ------------
 print(calculate_distance(drivers))
 
-m.save("simulation/maps/ecommerce.html")
+for d in drivers:
+    print(f'{d.id} --- Peso {d.peso} ---- DIM {d.volumen} ---  DISTANCIA {d.distancia_ruta}')
+    print()
+
+# m.save("simulation/maps/ecommerce.html")
 
 # -------- Guardamos ruta en TXT ------------
 with open(r'simulation/txt/ruta_ecommerce.txt', 'w') as fp:
@@ -150,7 +158,14 @@ with open(r'simulation/txt/ruta_ecommerce.txt', 'w') as fp:
 best_distance = calculate_distance(drivers)
 # print(best_distance)
 
-driver_improve = improve_route_aleatory(drivers, best_distance)
+# --------------------------------------------------------------------------------------
+#                     Mejorar aleatoriamente el caso base
 
-map_distance(driver_improve)
+# driver_improve = improve_route_aleatory(drivers, best_distance)
+# map_distance(driver_improve)
+
+# --------------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------------
+#                                   2 OPT
 
