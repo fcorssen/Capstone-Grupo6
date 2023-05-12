@@ -1,5 +1,5 @@
 import geopy.distance
-
+import random
 
 class Driver:
     def __init__(self, id, origen):
@@ -10,21 +10,21 @@ class Driver:
         self.volumen = 0
         self.origen = origen
         self.ruta = []
-        self.distancia_ruta = 0
+        self.tiempo = 0
         # self.ubicaion_actual = []
 
     def agregar_ecommerce(self, ecommerce):
         self.peso += ecommerce.peso
         self.volumen += ecommerce.volumen
         self.ruta.append(ecommerce.ubicacion)
-        self.distancia_ruta += geopy.distance.geodesic(self.origen, ecommerce.ubicacion).km
+        self.tiempo += random.randint(8, 15)
+        
         # self.ubicacion_actual = ecommerce.ubicacion
     
     def eliminar_ecommerce(self, ecommerce):
         self.peso -= ecommerce.peso
         self.volumen -= ecommerce.volumen
         self.ruta.remove(ecommerce.ubicacion)
-        self.distancia_ruta -= geopy.distance.geodesic(self.origen, ecommerce.ubicacion).km
         # self.ubicacion_actual = ecommerce.ubicacion
 
 

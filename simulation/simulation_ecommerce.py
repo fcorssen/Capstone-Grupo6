@@ -85,7 +85,7 @@ for j in range(len(drivers)):
 
 drivers = driver_order
 
-drivers.reverse()
+# drivers.reverse()
 
 # -------- Comenzamos a simular ---------- 
 ecommerce_visited = []
@@ -143,9 +143,17 @@ for i in range(len(drivers)):
 # ------------- Sumamos la distancia total ------------
 print(calculate_distance(drivers))
 
-for d in drivers:
-    print(f'{d.id} --- Peso {d.peso} ---- DIM {d.volumen} ---  DISTANCIA {d.distancia_ruta}')
-    print()
+
+# ----- Ver tiempo de recoleccion -------------
+# for d in drivers:
+#     distance1 = 0
+#     for i in range(len(d.ruta)):
+#         if i != len(d.ruta) - 1:
+#             distance1 += geopy.distance.geodesic(d.ruta[i], d.ruta[i+1]).km
+
+#     print(f'tiempo = {d.tiempo} ------ distance = {distance1}')
+#     print()
+
 
 # m.save("simulation/maps/ecommerce.html")
 
