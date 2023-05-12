@@ -5,7 +5,7 @@ import folium
 from folium.features import DivIcon
 from clases import Driver, Paquete, Ecommerce, Centro
 from funciones import calculate_distance, improve_route_aleatory, map_distance, generate_colors
-
+from Opt2_function import distance_driver, opt2
 
 # ------------- Cargar los datos --------------
 
@@ -140,10 +140,6 @@ for i in range(len(drivers)):
                 )).add_to(m)
     folium.PolyLine(drivers[i].ruta, color=colors[i], weight=3, opacity=1).add_to(m)
 
-# ------------- Sumamos la distancia total ------------
-print(calculate_distance(drivers))
-
-
 # ----- Ver tiempo de recoleccion -------------
 # for d in drivers:
 #     distance1 = 0
@@ -164,7 +160,7 @@ with open(r'simulation/txt/ruta_ecommerce.txt', 'w') as fp:
         fp.write("\n")
 
 best_distance = calculate_distance(drivers)
-# print(best_distance)
+print(best_distance)
 
 # --------------------------------------------------------------------------------------
 #                     Mejorar aleatoriamente el caso base
@@ -176,4 +172,7 @@ best_distance = calculate_distance(drivers)
 
 # --------------------------------------------------------------------------------------
 #                                   2 OPT
-
+# for d in drivers:
+#     d.ruta = opt2(d.ruta)
+# best_distance = calculate_distance(drivers)
+# print(f'Best distance with 2opt ---> {best_distance}')
