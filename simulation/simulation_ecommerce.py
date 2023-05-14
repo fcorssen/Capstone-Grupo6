@@ -4,7 +4,7 @@ import random
 import folium
 from folium.features import DivIcon
 from clases import Driver, Paquete, Ecommerce, Centro
-from funciones import calculate_distance, improve_route_aleatory, map_distance, generate_colors
+from funciones import calculate_distance, improve_route_aleatory, map_distance, generate_colors, swap_ecommerce
 from Opt2_function import distance_driver, opt2
 
 # ------------- Cargar los datos --------------
@@ -107,10 +107,10 @@ for j in range(len(drivers)):
     drivers[j].agregar_ecommerce(ecommerce)
     ecommerce_visited.append(ecommerce.id)
 
-    if j < 10:
-        n = 7
+    if j < 12:
+        n = 6
     else:
-        n = 4
+        n = 5
     while len(drivers[j].ruta) < n:
         distance = 100000
         # Guardamos la minima distancia entre los puntos
@@ -134,11 +134,11 @@ for j in range(len(drivers)):
 colors = generate_colors(len(drivers))
 
 # ------ Graficamos los puntos --------------
-for i in range(len(drivers)):
-    folium.Marker(drivers[i].origen, icon=DivIcon(
-                icon_size=(150,36), icon_anchor=(7,20), html=f'<div style="font-size: 18pt; color : black">{i + 1}</div>',
-                )).add_to(m)
-    folium.PolyLine(drivers[i].ruta, color=colors[i], weight=3, opacity=1).add_to(m)
+# for i in range(len(drivers)):
+#     folium.Marker(drivers[i].origen, icon=DivIcon(
+#                 icon_size=(150,36), icon_anchor=(7,20), html=f'<div style="font-size: 18pt; color : black">{i + 1}</div>',
+#                 )).add_to(m)
+#     folium.PolyLine(drivers[i].ruta, color=colors[i], weight=3, opacity=1).add_to(m)
 
 # ----- Ver tiempo de recoleccion -------------
 # for d in drivers:
@@ -154,10 +154,10 @@ for i in range(len(drivers)):
 # m.save("simulation/maps/ecommerce.html")
 
 # -------- Guardamos ruta en TXT ------------
-with open(r'simulation/txt/ruta_ecommerce.txt', 'w') as fp:
-    for driver in drivers:
-        fp.write("%s " % driver.ruta)
-        fp.write("\n")
+# with open(r'simulation/txt/ruta_ecommerce.txt', 'w') as fp:
+#     for driver in drivers:
+#         fp.write("%s " % driver.ruta)
+#         fp.write("\n")
 
 best_distance = calculate_distance(drivers)
 print(best_distance)
@@ -165,7 +165,9 @@ print(best_distance)
 # --------------------------------------------------------------------------------------
 #                     Mejorar aleatoriamente el caso base
 
-# driver_improve = improve_route_aleatory(drivers, best_distance)
+# driver_improve = improve_route_aleatory(drivers, ecommerces, best_distance)
+# best_distance = calculate_distance(driver_improve)
+# print(best_distance)
 # map_distance(driver_improve)
 
 # --------------------------------------------------------------------------------------
@@ -176,3 +178,31 @@ print(best_distance)
 #     d.ruta = opt2(d.ruta)
 # best_distance = calculate_distance(drivers)
 # print(f'Best distance with 2opt ---> {best_distance}')
+
+
+# --------------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------------
+#                                   SWAP
+# driver_improve = swap_ecommerce(drivers, ecommerces, best_distance)
+# best_distance = calculate_distance(driver_improve)
+# print(best_distance)
+# print()
+# for d in driver_improve:
+#     print(f'{d.id} ------ Peso --> {d.peso} y volumen --> {d.volumen} tiempo --->  {d.tiempo}')
+#     print()
+# map_distance(driver_improve, "simulation/maps/ecommerce_swap.html")
+
+# --------------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------------
+#                  Mejorar aleatoriamente el caso base y  SWAP
+# driver_aleatory = improve_route_aleatory(drivers, ecommerces, best_distance)
+# driver_improve = swap_ecommerce(driver_aleatory, ecommerces, best_distance)
+# best_distance = calculate_distance(driver_improve)
+# print(best_distance)
+# print()
+# for d in driver_improve:
+#     print(f'{d.id} ------ Peso --> {d.peso} y volumen --> {d.volumen} tiempo --->  {d.tiempo}')
+#     print()
+# map_distance(driver_improve, "simulation/maps/ecommerce_reverse_aleatory_swap.html")
