@@ -6,6 +6,7 @@ import folium
 from folium.features import DivIcon
 import matplotlib.cm as cm
 import matplotlib.colors as cl
+import time
 
 
 # random.seed(343545)
@@ -51,7 +52,9 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
 
     # AL ITERAR 20000 VECES DIO UN  DRIVER CON MUCHISIMOS ECOMMERCE
     # Entre mas iteraciones mejor es el resultado
-    for i in range(1000):
+    t_end = time.time() + 60 * 5
+
+    while time.time() < t_end:
         try:
             driver_take = random.randint(0, len(drivers) - 1)
             driver_give = random.randint(0, len(drivers) - 1)
