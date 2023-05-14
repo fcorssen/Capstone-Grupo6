@@ -7,6 +7,7 @@ from folium.features import DivIcon
 import matplotlib.cm as cm
 import matplotlib.colors as cl
 import time
+from Opt2_function import opt2, distance_driver
 
 
 # random.seed(343545)
@@ -50,8 +51,6 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
 
     drivers_copy = deepcopy(drivers)
 
-    # AL ITERAR 20000 VECES DIO UN  DRIVER CON MUCHISIMOS ECOMMERCE
-    # Entre mas iteraciones mejor es el resultado
     t_end = time.time() + 60 * 5
 
     while time.time() < t_end:
@@ -65,7 +64,7 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
                 driver_take = random.randint(0, len(drivers) - 1)
                 driver_give = random.randint(0, len(drivers) - 1)
 
-            if len(drivers[driver_take].ruta) > 2:
+            if len(drivers[driver_take].ruta) > 4 and len(drivers[driver_give].ruta) <= 8:
                 
                 # Posicion que se cambia
                 pos_change = random.randint(1, len(drivers[driver_take].ruta) - 2)
@@ -88,9 +87,11 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
                         volumen_change = e.volumen
                 drivers[driver_take].peso -= peso_change
                 drivers[driver_take].volumen -= volumen_change
+                drivers[driver_take].tiempo -= random.randint(8, 15)
                 drivers[driver_give].peso += peso_change
                 drivers[driver_give].volumen += volumen_change
-
+                drivers[driver_give].tiempo += random.randint(8, 15)
+                
                 if drivers[driver_give].peso < 450 and drivers[driver_give].volumen < 2 and drivers[driver_take].peso < 450 and drivers[driver_take].volumen < 2:
 
                     # Revisar nueva ruta para el driver que se le quita un ecommerce
@@ -127,8 +128,8 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
                         drivers_copy = deepcopy(drivers)
                     else:
                         drivers = deepcopy(drivers_copy)
-                else:
-                    print('No cumple condicion de Peso o Dimension')
+                # else:
+                #     print('No cumple condicion de Peso o Dimension')
 
         except:
             print("El driver ya no tiene ruta")
@@ -153,7 +154,7 @@ def generate_colors(n):
     return colors_new
 
 
-def map_distance(drivers):
+def map_distance(drivers, name):
 
     coordinate_center = [-33.4369436, -70.634449]
 
@@ -164,4 +165,78 @@ def map_distance(drivers):
         folium.CircleMarker(drivers[i].origen, color='black', radius=4, fill=True).add_to(m) 
         folium.PolyLine(drivers[i].ruta, color=colors[i], weight=3, opacity=1).add_to(m)
 
-    m.save("simulation/maps/ecommerce_improve.html")
+    m.save(name)
+
+
+def swap_ecommerce(drivers, ecommerces, best_distance):
+
+    drivers_copy = deepcopy(drivers)
+    t_end = time.time() + 60 * 5
+
+    while time.time() < t_end:
+        try:
+            driver1 = random.randint(0, len(drivers) - 1)
+            driver2 = random.randint(0, len(drivers) - 1)
+
+            while driver1 == driver2:
+                driver1 = random.randint(0, len(drivers) - 1)
+                driver2 = random.randint(0, len(drivers) - 1)
+            
+            pos_change1 = random.randint(1, len(drivers[driver1].ruta) - 2)
+            pos_change2 = random.randint(1, len(drivers[driver2].ruta) - 2)
+
+            value_change1 = drivers[driver1].ruta[pos_change1]
+            value_change2 = drivers[driver2].ruta[pos_change2]
+
+            drivers[driver1].ruta.remove(value_change1)
+            drivers[driver2].ruta.remove(value_change2)
+
+            drivers[driver1].ruta.insert(-1, value_change2)
+            drivers[driver2].ruta.insert(-1, value_change1)
+
+
+            for e in ecommerces:
+                if e.ubicacion == value_change1:
+                    peso_change1 = e.peso
+                    volumen_change1 = e.volumen
+                elif e.ubicacion == value_change2:
+                    peso_change2 = e.peso
+                    volumen_change2 = e.volumen
+            drivers[driver1].peso -= peso_change1
+            drivers[driver1].volumen -= volumen_change1
+            drivers[driver2].peso += peso_change2
+            drivers[driver2].volumen += volumen_change2
+
+            if drivers[driver1].peso < 450 and drivers[driver1].volumen < 2 and drivers[driver2].peso < 450 and drivers[driver2].volumen < 2:
+
+                cur_distance1 = distance_driver(drivers[driver1])
+                new_distance1 = distance_driver(drivers[driver1])
+                if new_distance1 < cur_distance1:
+                    driver1.ruta = opt2(drivers[driver1].ruta)
+                
+                cur_distance2 = distance_driver(drivers[driver2])
+                new_distance2 = distance_driver(drivers[driver2])
+                if new_distance2 < cur_distance2:
+                    driver2.ruta = opt2(drivers[driver2].ruta)
+                
+                new_distance = calculate_distance(drivers)
+
+                if new_distance < best_distance:
+                    print('--------------------------')
+                    print(f'Mejor distancia ahora {new_distance} antes {best_distance}')
+                    print('--------------------------')
+                    best_distance = new_distance
+                    drivers_copy = deepcopy(drivers)
+                else:
+                    drivers = deepcopy(drivers_copy)
+
+        except:
+                print("El driver ya no tiene ruta")
+    
+    # -------- Guardamos ruta en TXT ------------
+    with open(r'simulation/txt/ruta_ecommerce_swap.txt', 'w') as fp:
+        for driver in drivers:
+            fp.write("%s " % driver.ruta)
+            fp.write("\n")
+    
+    return drivers
