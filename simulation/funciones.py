@@ -45,12 +45,10 @@ def min_route(ecommerces, driver):
     return route
 
 
-def improve_route_aleatory(drivers, best_distance):
+def improve_route_aleatory(drivers, ecommerces, best_distance):
 
     drivers_copy = deepcopy(drivers)
 
-    
-    # HAY Q REVISAR BIEN SI LA RUTA NO EXCEDE LAS CAPACIDADES DE PESO Y DIMENSION PQ
     # AL ITERAR 20000 VECES DIO UN  DRIVER CON MUCHISIMOS ECOMMERCE
     # Entre mas iteraciones mejor es el resultado
     for i in range(1000):
@@ -73,46 +71,61 @@ def improve_route_aleatory(drivers, best_distance):
                 value_change = drivers[driver_take].ruta[pos_change]
                 drivers[driver_give].ruta.insert(-1, value_change)
                 drivers[driver_take].ruta.pop(pos_change)
+                
 
                 # Entrega nuevas listas con la minima distancia
                 bodega = drivers[driver_take].ruta[-1]
                 driver_take_coor = drivers[driver_take].ruta[0]
                 driver_give_coor = drivers[driver_give].ruta[0]
 
-                # Revisar nueva ruta para el driver que se le quita un ecommerce
-                if len(drivers[driver_take].ruta) > 2:
-                    route_take = min_route(drivers[driver_take].ruta[1:-1], drivers[driver_take])
-                    # Agregamos la direccion del driver y bodega
-                    drivers[driver_take].ruta = route_take
-                    drivers[driver_take].ruta.insert(0, driver_take_coor)
-                    drivers[driver_take].ruta.append(bodega)
+                # Actualizo peso y dimension de cada driver
+                for e in ecommerces:
+                    if e.ubicacion == value_change:
+                        peso_change = e.peso
+                        volumen_change = e.volumen
+                drivers[driver_take].peso -= peso_change
+                drivers[driver_take].volumen -= volumen_change
+                drivers[driver_give].peso += peso_change
+                drivers[driver_give].volumen += volumen_change
+
+                if drivers[driver_give].peso < 450 and drivers[driver_give].volumen < 2 and drivers[driver_take].peso < 450 and drivers[driver_take].volumen < 2:
+
+                    # Revisar nueva ruta para el driver que se le quita un ecommerce
+                    if len(drivers[driver_take].ruta) > 2:
+                        route_take = min_route(drivers[driver_take].ruta[1:-1], drivers[driver_take])
+                        # Agregamos la direccion del driver y bodega
+                        drivers[driver_take].ruta = route_take
+                        drivers[driver_take].ruta.insert(0, driver_take_coor)
+                        drivers[driver_take].ruta.append(bodega)
+                        
+                    else:
+                        route_take = drivers[driver_take].ruta
                     
-                else:
-                    route_take = drivers[driver_take].ruta
-                
-                # Revisar nueva ruta para el driver que se le da un ecommerce
-                if len(drivers[driver_give].ruta) > 2: 
-                    route_give = min_route(drivers[driver_give].ruta[1:-1], drivers[driver_give])
+                    # Revisar nueva ruta para el driver que se le da un ecommerce
+                    if len(drivers[driver_give].ruta) > 2: 
+                        route_give = min_route(drivers[driver_give].ruta[1:-1], drivers[driver_give])
+                        drivers[driver_give].ruta = route_give
+                        drivers[driver_give].ruta.insert(0, driver_give_coor)
+                        drivers[driver_give].ruta.append(bodega)
+                    else:
+                        route_give = drivers[driver_give].ruta
+
+                    # Cambio las lista por las nuevas y elimino las viejas
+                    drivers[driver_take].ruta = route_take
                     drivers[driver_give].ruta = route_give
-                    drivers[driver_give].ruta.insert(0, driver_give_coor)
-                    drivers[driver_give].ruta.append(bodega)
+
+                    new_distance = calculate_distance(drivers)
+
+                    if new_distance < best_distance:
+                        print('--------------------------')
+                        print(f'Mejor distancia ahora {new_distance} antes {best_distance}')
+                        print('--------------------------')
+                        best_distance = new_distance
+                        drivers_copy = deepcopy(drivers)
+                    else:
+                        drivers = deepcopy(drivers_copy)
                 else:
-                    route_give = drivers[driver_give].ruta
-
-                # Cambio las lista por las nuevas y elimino las viejas
-                drivers[driver_take].ruta = route_take
-                drivers[driver_give].ruta = route_give
-
-                new_distance = calculate_distance(drivers)
-
-                if new_distance < best_distance:
-                    print('--------------------------')
-                    print(f'Mejor distancia ahora {new_distance} antes {best_distance}')
-                    print('--------------------------')
-                    best_distance = new_distance
-                    drivers_copy = deepcopy(drivers)
-                else:
-                    drivers = deepcopy(drivers_copy)
+                    print('No cumple condicion de Peso o Dimension')
 
         except:
             print("El driver ya no tiene ruta")
@@ -125,6 +138,7 @@ def improve_route_aleatory(drivers, best_distance):
             fp.write("\n")
     
     return drivers
+
 
 def map_distance(drivers):
 
