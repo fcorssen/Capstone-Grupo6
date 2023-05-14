@@ -143,24 +143,6 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
     return drivers
 
 
-def map_distance(drivers):
-
-    coordinate_center = [-33.4369436, -70.634449]
-
-    m = folium.Map(location=(coordinate_center[0], coordinate_center[1]))
-
-    for driver in drivers:
-        folium.CircleMarker(driver.origen, color='blue', radius=5, fill=True).add_to(m)
-
-    for i in range(len(drivers)):
-        folium.Marker(drivers[i].origen, icon=DivIcon(
-                    icon_size=(150,36), icon_anchor=(7,20), html=f'<div style="font-size: 18pt; color : black">{i + 1}</div>',
-                    )).add_to(m)
-        folium.PolyLine(drivers[i].ruta, color="red", weight=1.5, opacity=1).add_to(m)
-
-    m.save("simulation/maps/ecommerce_improve.html")
-
-
 def generate_colors(n):
     # Generate color palette for coordinates
     colors = cm.rainbow(np.linspace(0, 1, n))
@@ -169,3 +151,17 @@ def generate_colors(n):
         hex = cl.to_hex(el)
         colors_new += [hex]
     return colors_new
+
+
+def map_distance(drivers):
+
+    coordinate_center = [-33.4369436, -70.634449]
+
+    m = folium.Map(location=(coordinate_center[0], coordinate_center[1]))
+    colors = generate_colors(len(drivers))
+
+    for i in range(len(drivers)):
+        folium.CircleMarker(drivers[i].origen, color='black', radius=4, fill=True).add_to(m) 
+        folium.PolyLine(drivers[i].ruta, color=colors[i], weight=3, opacity=1).add_to(m)
+
+    m.save("simulation/maps/ecommerce_improve.html")
