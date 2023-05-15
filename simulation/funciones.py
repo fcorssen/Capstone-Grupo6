@@ -51,7 +51,7 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
 
     drivers_copy = deepcopy(drivers)
 
-    t_end = time.time() + 60 * 5
+    t_end = time.time() + 60 * 2
 
     while time.time() < t_end:
         try:
@@ -64,7 +64,7 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
                 driver_take = random.randint(0, len(drivers) - 1)
                 driver_give = random.randint(0, len(drivers) - 1)
 
-            if len(drivers[driver_take].ruta) > 3 and len(drivers[driver_give].ruta) <= 8:
+            if len(drivers[driver_take].ruta) > 4 and len(drivers[driver_give].ruta) < 7:
                 
                 # Posicion que se cambia
                 pos_change = random.randint(1, len(drivers[driver_take].ruta) - 2)
