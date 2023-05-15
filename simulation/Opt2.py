@@ -108,9 +108,20 @@ while time.time() < t_end:
 
 
 print(f'Best Distance {best_distance}')
+# for d in drivers_copy:
+#     distance = distance_driver(d)
+#     print(f'{d.id} --> tiempo de {d.tiempo} y distancia {distance}')
+t_prom = 0
+d_prom = 0
 for d in drivers_copy:
-    distance = distance_driver(d)
-    print(f'{d.id} --> tiempo de {d.tiempo} y distancia {distance}')
+    dis = distance_driver(d)
+    tiempo_recoleccion = (dis/30)*60
+    print(f'{d.id} ---- Distancia {dis} ---- tiempo {d.tiempo + tiempo_recoleccion}')
+    t_prom += d.tiempo + tiempo_recoleccion
+    d_prom += dis
+    print()
+print(f'Tiempo promedio = {t_prom/18}')
+print(f'Distancia promedio = {d_prom/18}')
 
 # -------- Guardamos ruta en TXT ------------
 with open(r'simulation/txt/ruta_aleatorio_2opt.txt', 'w') as fp:
@@ -123,10 +134,20 @@ colors = generate_colors(len(drivers))
 
 # ------ Graficamos los puntos --------------
 # ---------- Creamos el mapa ----------
-coordinate_center = [-33.4369436, -70.634449]
-m = folium.Map(location=coordinate_center)
-for i in range(len(drivers_copy)):
-    folium.CircleMarker(drivers_copy[i].origen, color='black', radius=4, fill=True).add_to(m) 
-    folium.PolyLine(drivers_copy[i].ruta, color=colors[i], weight=3, opacity=1).add_to(m)
+# coordinate_center = [-33.4369436, -70.634449]
+# m = folium.Map(location=coordinate_center)
+# g = folium.Map(location=coordinate_center)
+# for i in range(len(drivers_copy)):
+#     folium.CircleMarker(drivers_copy[i].origen, color='black', radius=4, fill=True).add_to(m) 
+#     folium.PolyLine(drivers_copy[i].ruta, color=colors[i], weight=3, opacity=1).add_to(m)
 
-m.save("simulation/maps/ruta_aleatoria_2opt.html")
+# for i in range(len(drivers_copy)):
+#     if i == 0:
+#         folium.CircleMarker(drivers_copy[i].origen, color='black', radius=4, fill=True).add_to(g)
+#         folium.PolyLine(drivers_copy[i].ruta, color=colors[i], weight=3, opacity=1).add_to(g)
+#     elif i == len(drivers) - 1:
+#         folium.CircleMarker(drivers_copy[i].origen, color='black', radius=4, fill=True).add_to(g)
+#         folium.PolyLine(drivers_copy[i].ruta, color=colors[i], weight=3, opacity=1).add_to(g)
+
+# m.save("simulation/maps/ruta_aleatoria_2opt.html")
+# g.save("simulation/maps/ruta_aleatoria_2opt_2drivers.html")

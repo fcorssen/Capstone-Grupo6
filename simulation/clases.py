@@ -10,6 +10,7 @@ class Driver:
         self.volumen = 0
         self.origen = origen
         self.ruta = []
+        self.ecommerce = []
         self.tiempo = 0
         # self.ubicaion_actual = []
 
@@ -17,6 +18,7 @@ class Driver:
         self.peso += ecommerce.peso
         self.volumen += ecommerce.volumen
         self.ruta.append(ecommerce.ubicacion)
+        self.ecommerce.append(ecommerce)
         self.tiempo += random.randint(8, 15)
         
         # self.ubicacion_actual = ecommerce.ubicacion
@@ -35,6 +37,7 @@ class Ecommerce:
         self.volumen = 0
         self.ubicacion = ubicacion
         self.paquetes = []
+        self.vecindad = []
         self.recogido = False
 
     def agregar_paquete(self, paquete):
