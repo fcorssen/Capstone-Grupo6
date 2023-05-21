@@ -166,11 +166,11 @@ best_distance = calculate_distance(drivers)
 
 # --------------------------------------------------------------------------------------
 #                  Mejorar aleatoriamente el caso base y  SWAP
-driver_improve = improve_route_aleatory(drivers, ecommerces, best_distance)
-best_distance = calculate_distance(driver_improve[0])
-print(f'CHANGE METHODD best distance {best_distance}')
-driver_improve = swap_ecommerce(driver_improve[0], ecommerces, best_distance, driver_improve[3], driver_improve[1], driver_improve[2])
-plot_improvement(driver_improve[1], driver_improve[2], 'Aleatory improvement and Swap', driver_improve[3])
+# driver_improve = improve_route_aleatory(drivers, ecommerces, best_distance)
+# best_distance = calculate_distance(driver_improve[0])
+# print(f'CHANGE METHODD best distance {best_distance}')
+# driver_improve = swap_ecommerce(driver_improve[0], ecommerces, best_distance, driver_improve[3], driver_improve[1], driver_improve[2])
+# plot_improvement(driver_improve[1], driver_improve[2], 'Aleatory improvement and Swap', driver_improve[3])
 
 
 
