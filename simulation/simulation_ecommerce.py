@@ -4,7 +4,7 @@ import random
 import folium
 from folium.features import DivIcon
 from clases import Driver, Paquete, Ecommerce, Centro
-from funciones import calculate_distance, improve_route_aleatory, map_distance, generate_colors, swap_ecommerce
+from funciones import calculate_distance, improve_route_aleatory, map_distance, generate_colors, swap_ecommerce, plot_improvement
 from Opt2_function import distance_driver, opt2
 
 # ------------- Cargar los datos --------------
@@ -63,7 +63,7 @@ for paquete in paquetes_dia_1:
 # ---------- Creamos el mapa ----------
 coordinate_center = [-33.4369436, -70.634449]
 m = folium.Map(location=(coordinate_center[0], coordinate_center[1]))
-folium.CircleMarker(coordinate_center, color='red', radius=5, fill=True).add_to(m)
+# folium.CircleMarker(coordinate_center, color='red', radius=5, fill=True).add_to(m)
 
 
 # --------- Ordenamos los driver por cercania a un punto ------------------- 
@@ -79,13 +79,12 @@ for j in range(len(drivers)):
                 distance = geopy.distance.geodesic(coordinate_center, drivers[i].origen).km
                 driver = drivers[i]
 
-    folium.CircleMarker(driver.origen, color='blue', radius=5, fill=True).add_to(m)
     driver_id_order.append(driver.id)
     driver_order.append(driver)
 
 drivers = driver_order
 
-# drivers.reverse()
+drivers.reverse()
 
 # -------- Comenzamos a simular ---------- 
 ecommerce_visited = []
@@ -133,42 +132,17 @@ for j in range(len(drivers)):
 # ----- Generamos los colores --------
 colors = generate_colors(len(drivers))
 
-# ------ Graficamos los puntos --------------
-# for i in range(len(drivers)):
-#     folium.Marker(drivers[i].origen, icon=DivIcon(
-#                 icon_size=(150,36), icon_anchor=(7,20), html=f'<div style="font-size: 18pt; color : black">{i + 1}</div>',
-#                 )).add_to(m)
-#     folium.PolyLine(drivers[i].ruta, color=colors[i], weight=3, opacity=1).add_to(m)
-
-# ----- Ver tiempo de recoleccion -------------
-# for d in drivers:
-#     distance1 = 0
-#     for i in range(len(d.ruta)):
-#         if i != len(d.ruta) - 1:
-#             distance1 += geopy.distance.geodesic(d.ruta[i], d.ruta[i+1]).km
-
-#     print(f'tiempo = {d.tiempo} ------ distance = {distance1}')
-#     print()
-
-
-# m.save("simulation/maps/ecommerce.html")
-
-# -------- Guardamos ruta en TXT ------------
-# with open(r'simulation/txt/ruta_ecommerce.txt', 'w') as fp:
-#     for driver in drivers:
-#         fp.write("%s " % driver.ruta)
-#         fp.write("\n")
 
 best_distance = calculate_distance(drivers)
-print(best_distance)
+# print(best_distance)
 
 # --------------------------------------------------------------------------------------
 #                     Mejorar aleatoriamente el caso base
 
 # driver_improve = improve_route_aleatory(drivers, ecommerces, best_distance)
-# best_distance = calculate_distance(driver_improve)
-# print(best_distance)
-# map_distance(driver_improve)
+# best_distance = calculate_distance(driver_improve[0])
+# plot_improvement(driver_improve[1], driver_improve[2], 'Aleatory improvement', driver_improve[3])
+
 
 # --------------------------------------------------------------------------------------
 
@@ -185,24 +159,43 @@ print(best_distance)
 # --------------------------------------------------------------------------------------
 #                                   SWAP
 # driver_improve = swap_ecommerce(drivers, ecommerces, best_distance)
-# best_distance = calculate_distance(driver_improve)
-# print(best_distance)
-# print()
-# for d in driver_improve:
-#     print(f'{d.id} ------ Peso --> {d.peso} y volumen --> {d.volumen} tiempo --->  {d.tiempo}')
-#     print()
-# map_distance(driver_improve, "simulation/maps/ecommerce_swap.html")
+# driver_improve = swap_ecommerce(driver_improve[0], ecommerces, best_distance, driver_improve[3], driver_improve[1], driver_improve[2])
+# plot_improvement(driver_improve[1], driver_improve[2], 'Aleatory improvement and Swap', driver_improve[3])
 
 # --------------------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------------------
 #                  Mejorar aleatoriamente el caso base y  SWAP
-# driver_aleatory = improve_route_aleatory(drivers, ecommerces, best_distance)
-# driver_improve = swap_ecommerce(driver_aleatory, ecommerces, best_distance)
-# best_distance = calculate_distance(driver_improve)
-# print(best_distance)
-# print()
+driver_improve = improve_route_aleatory(drivers, ecommerces, best_distance)
+best_distance = calculate_distance(driver_improve[0])
+print(f'CHANGE METHODD best distance {best_distance}')
+driver_improve = swap_ecommerce(driver_improve[0], ecommerces, best_distance, driver_improve[3], driver_improve[1], driver_improve[2])
+plot_improvement(driver_improve[1], driver_improve[2], 'Aleatory improvement and Swap', driver_improve[3])
+
+
+
+
+# ----------------------------------------------------------------------------
+# Imprimir tiempos
+
+# t_prom = 0
+# d_prom = 0
 # for d in driver_improve:
-#     print(f'{d.id} ------ Peso --> {d.peso} y volumen --> {d.volumen} tiempo --->  {d.tiempo}')
+#     dis = distance_driver(d)
+#     tiempo_recoleccion = (dis/30)*60
+#     print(f'{d.id} ---- Distancia {dis} ---- tiempo {d.tiempo + tiempo_recoleccion}')
+#     t_prom += d.tiempo + tiempo_recoleccion
+#     d_prom += dis
 #     print()
-# map_distance(driver_improve, "simulation/maps/ecommerce_reverse_aleatory_swap.html")
+# print(f'Tiempo promedio = {t_prom/18}')
+# print(f'Distancia promedio = {d_prom/18}')
+
+# g = folium.Map(location=coordinate_center)
+# for i in range(len(driver_improve)):
+#     if i == 0:
+#         folium.CircleMarker(driver_improve[i].origen, color='black', radius=4, fill=True).add_to(g)
+#         folium.PolyLine(driver_improve[i].ruta, color=colors[i], weight=3, opacity=1).add_to(g)
+#     elif i == len(drivers) - 1:
+#         folium.CircleMarker(driver_improve[i].origen, color='black', radius=4, fill=True).add_to(g)
+#         folium.PolyLine(driver_improve[i].ruta, color=colors[i], weight=3, opacity=1).add_to(g)
+# g.save("simulation/maps/ecommerce_reverse_aleatory_swap_2drivers.html")

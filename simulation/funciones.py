@@ -7,6 +7,7 @@ from folium.features import DivIcon
 import matplotlib.cm as cm
 import matplotlib.colors as cl
 import time
+import matplotlib.pyplot as plt
 from Opt2_function import opt2, distance_driver
 
 
@@ -47,11 +48,33 @@ def min_route(ecommerces, driver):
     return route
 
 
+def plot_improvement(x, y, name, i):
+    plt.plot(x, y)
+    
+    plt.ylim(200,400)
+    plt.xlim(1,i+100)
+    
+    plt.xlabel('Iteración')
+    plt.ylabel('Mejor solucion')
+    
+    plt.title(name)
+    
+    # plt.show()
+    plt.savefig(f'simulation/graph/{name}.png')
+
+
 def improve_route_aleatory(drivers, ecommerces, best_distance):
+
+    i = 0
+    best_list = []
+    iteration_list = []
+    iteration_list.append(i)
+    best_list.append(best_distance)
+    
 
     drivers_copy = deepcopy(drivers)
 
-    t_end = time.time() + 60 * 2
+    t_end = time.time() + 60 * 5
 
     while time.time() < t_end:
         try:
@@ -64,7 +87,7 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
                 driver_take = random.randint(0, len(drivers) - 1)
                 driver_give = random.randint(0, len(drivers) - 1)
 
-            if len(drivers[driver_take].ruta) > 4 and len(drivers[driver_give].ruta) < 7:
+            if len(drivers[driver_take].ruta) >= 4 and len(drivers[driver_give].ruta) <= 9:
                 
                 # Posicion que se cambia
                 pos_change = random.randint(1, len(drivers[driver_take].ruta) - 2)
@@ -131,17 +154,21 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
                 # else:
                 #     print('No cumple condicion de Peso o Dimension')
 
+            i+=1
+            iteration_list.append(i)
+            best_list.append(best_distance)
+
         except:
             print("El driver ya no tiene ruta")
         
+    # # -------- Guardamos ruta en TXT ------------
+    # with open(r'simulation/txt/ruta_ecommerce_mejorada.txt', 'w') as fp:
+    #     for driver in drivers:
+    #         fp.write("%s " % driver.ruta)
+    #         fp.write("\n")
 
-    # -------- Guardamos ruta en TXT ------------
-    with open(r'simulation/txt/ruta_ecommerce_mejorada.txt', 'w') as fp:
-        for driver in drivers:
-            fp.write("%s " % driver.ruta)
-            fp.write("\n")
     
-    return drivers
+    return [drivers, iteration_list, best_list, i]
 
 
 def generate_colors(n):
@@ -168,7 +195,7 @@ def map_distance(drivers, name):
     m.save(name)
 
 
-def swap_ecommerce(drivers, ecommerces, best_distance):
+def swap_ecommerce(drivers, ecommerces, best_distance, i, iteration_list, best_list):
 
     drivers_copy = deepcopy(drivers)
     t_end = time.time() + 60 * 5
@@ -230,16 +257,21 @@ def swap_ecommerce(drivers, ecommerces, best_distance):
                 else:
                     drivers = deepcopy(drivers_copy)
 
+            i+=1
+            iteration_list.append(i)
+            best_list.append(best_distance)
+
         except:
                 print("El driver ya no tiene ruta")
     
     # -------- Guardamos ruta en TXT ------------
-    with open(r'simulation/txt/ruta_ecommerce_swap.txt', 'w') as fp:
-        for driver in drivers:
-            fp.write("%s " % driver.ruta)
-            fp.write("\n")
+    # with open(r'simulation/txt/ruta_ecommerce_swap.txt', 'w') as fp:
+    #     for driver in drivers:
+    #         fp.write("%s " % driver.ruta)
+    #         fp.write("\n")
     
-    return drivers
+    # return drivers
+    return [drivers, iteration_list, best_list, i]
 
 
 def vecindad(ecommerces):
