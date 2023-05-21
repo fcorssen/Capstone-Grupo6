@@ -51,7 +51,7 @@ def min_route(ecommerces, driver):
 def plot_improvement(x, y, name, i):
     plt.plot(x, y)
     
-    plt.ylim(200,400)
+    plt.ylim(250,380)
     plt.xlim(1,i+100)
     
     plt.xlabel('Iteración')
