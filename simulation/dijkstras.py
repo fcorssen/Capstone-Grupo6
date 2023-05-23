@@ -93,7 +93,11 @@ for i in range(len(drivers[0].ruta) - 1):
 
 g = Graph(7)
 g.graph = graph
-g.dijkstra(0)
+
+
+
+g.dijkstra(0,drivers[0].ruta)
+
 
 # # Tienen 6 nodos, calcular el grafo entre estos 6 nodos,  n^2   
 

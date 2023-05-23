@@ -1,4 +1,5 @@
 import geopy.distance
+from geopy import Point, distance
 
 
 class Driver:
@@ -36,6 +37,7 @@ class Ecommerce:
         self.ubicacion = ubicacion
         self.paquetes = []
         self.recogido = False
+        self.distancia_centro = distance.distance(Point(self.ubicacion), Point(-33.46834837,-70.69399442)).km
 
     def agregar_paquete(self, paquete):
         self.paquetes.append(paquete)
