@@ -4,7 +4,7 @@ import random
 import folium
 from folium.features import DivIcon
 from clases import Driver, Paquete, Ecommerce, Centro
-from funciones import calculate_distance, distance_driver, improve_route_aleatory, plot_improvement
+from funciones import calculate_distance, distance_driver, improve_route_aleatory, plot_improvement, generate_colors
 
 
 # ------------- Cargar los datos --------------
@@ -143,19 +143,33 @@ print(best_distance)
 
 driver_improve = improve_route_aleatory(drivers, paquetes, best_distance)
 best_distance = calculate_distance(driver_improve[0])
-plot_improvement(driver_improve[1], driver_improve[2], 'Aleatory improvement', driver_improve[3])
+# plot_improvement(driver_improve[1], driver_improve[2], 'Aleatory improvement', driver_improve[3])
+
+colors = generate_colors(len(drivers))
+# ---------- Creamos el mapa ----------
+coordinate_center = [-33.4369436, -70.634449]
+m = folium.Map(location=coordinate_center)
+
+drivers = driver_improve[0]
+
+for i in range(len(drivers)):
+    folium.CircleMarker(drivers[i].origen, color='black', radius=4, fill=True).add_to(m) 
+    folium.PolyLine(drivers[i].ruta, color=colors[i], weight=3, opacity=1).add_to(m)
+
+
+m.save("simulation_delivery/maps/improve_aleatory.html")
 
  # ----------------------------------------------------------------------------
 # Imprimir tiempos
 
-# t_prom = 0
-# d_prom = 0
-# for d in drivers:
-#     dis = distance_driver(d)
-#     tiempo_recoleccion = (dis/30)*60
-#     print(f'{d.id} ---- Distancia {dis} ---- tiempo {d.tiempo + tiempo_recoleccion}')
-#     t_prom += d.tiempo + tiempo_recoleccion
-#     d_prom += dis
-#     print()
-# print(f'Tiempo promedio = {t_prom/18}')
-# print(f'Distancia promedio = {d_prom/18}')
+t_prom = 0
+d_prom = 0
+for d in drivers:
+    dis = distance_driver(d)
+    tiempo_recoleccion = (dis/30)*60
+    print(f'{d.id} ---- Distancia {dis} ---- tiempo {d.tiempo + tiempo_recoleccion}')
+    t_prom += d.tiempo + tiempo_recoleccion
+    d_prom += dis
+    print()
+print(f'Tiempo promedio = {t_prom/18}')
+print(f'Distancia promedio = {d_prom/18}')
