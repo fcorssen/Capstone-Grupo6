@@ -74,7 +74,7 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
 
     drivers_copy = deepcopy(drivers)
 
-    t_end = time.time() + 60 * 2
+    t_end = time.time() + 60 * 1
 
     while time.time() < t_end:
         try:
@@ -307,22 +307,6 @@ def improve_route_min_max_time(drivers, ecommerces, best_distance):
     while time.time() < t_end:
         try:
             
-            # list_take = []
-            # for d in drivers:
-            #     max_dis = 0
-            #     if d not in list_take and len(list_take) < 5:
-            #         if max_dis < distance_driver(d):
-            #             list_take.append(d)
-            # list_give = []
-
-            # for d in drivers:
-            #     min_dis = 10000
-            #     if d not in list_give and len(list_give) < 8:
-            #         if min_dis > distance_driver(d):
-            #             list_give.append(d)
-
-            # driver_give = random.choice(list_give)
-            # driver_take = random.choice(list_take)
             drivers = time_drivers(drivers)
             driver_give = drivers[0]
             driver_take = drivers[-1]
@@ -351,10 +335,8 @@ def improve_route_min_max_time(drivers, ecommerces, best_distance):
                         volumen_change = e.volumen
                 driver_take.peso -= peso_change
                 driver_take.volumen -= volumen_change
-                driver_take.tiempo -= random.randint(8, 15)
                 driver_give.peso += peso_change
                 driver_give.volumen += volumen_change
-                driver_give.tiempo += random.randint(8, 15)
                 
                 if driver_give.peso < 450 and driver_give.volumen < 2 and driver_take.peso < 450 and driver_take.volumen < 2:
 
@@ -383,6 +365,22 @@ def improve_route_min_max_time(drivers, ecommerces, best_distance):
                     driver_give.ruta = route_give
 
                     new_distance = calculate_distance(drivers)
+
+                    # Nuevo tiempo driver take
+                    dis = distance_driver(driver_take)
+                    driver_take.tiempo = 0
+                    for k in range(len(driver_take.ruta) - 2):
+                        driver_take.tiempo += random.randint(8, 15)
+                    tiempo_recoleccion = (dis/50)*60
+                    driver_take.tiempo += tiempo_recoleccion
+
+                    # Nuevo tiempo driver give
+                    dis = distance_driver(driver_give)
+                    driver_give.tiempo = 0
+                    for k in range(len(driver_give.ruta) - 2):
+                        driver_give.tiempo += random.randint(8, 15)
+                    tiempo_recoleccion = (dis/50)*60
+                    driver_give.tiempo += tiempo_recoleccion
                     
 
                     # if new_distance < best_distance:

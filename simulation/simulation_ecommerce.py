@@ -174,8 +174,12 @@ best_distance = calculate_distance(drivers)
 
 # --------------------------------------------------------------------------------------
 #                  DRIVER IMPROVE CHOOSING DRIVERS WITH MORE AND LESS TIME
+driver_improve = improve_route_aleatory(drivers, ecommerces, best_distance)
+drivers = driver_improve[0]
 
-# drivers = driver
+print()
+print('TIEMPOOOO')
+print()
 driver_improve = improve_route_min_max_time(drivers, ecommerces, best_distance)
 best_distance = calculate_distance(driver_improve)
 print(f'BEST DISTANCE = {best_distance}')
