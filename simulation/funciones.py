@@ -74,7 +74,7 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
 
     drivers_copy = deepcopy(drivers)
 
-    t_end = time.time() + 60 * 5
+    t_end = time.time() + 60 * 2
 
     while time.time() < t_end:
         try:
@@ -198,7 +198,7 @@ def map_distance(drivers, name):
 def swap_ecommerce(drivers, ecommerces, best_distance, i, iteration_list, best_list):
 
     drivers_copy = deepcopy(drivers)
-    t_end = time.time() + 60 * 5
+    t_end = time.time() + 60 * 0.2
 
     while time.time() < t_end:
         try:
@@ -287,7 +287,18 @@ def vecindad(ecommerces):
             e.vecindad.append(ecom_add)
 
 
-def improve_route(drivers, ecommerces, best_distance):
+def time_drivers(drivers):
+    for d in drivers:
+        dis = distance_driver(d)
+        d.tiempo = 0
+        for k in range(len(d.ruta) - 2):
+            d.tiempo += random.randint(8, 15)
+        tiempo_recoleccion = (dis/50)*60
+        d.tiempo += tiempo_recoleccion
+    drivers.sort(key=lambda x: x.tiempo)
+    return drivers
+
+def improve_route_min_max_time(drivers, ecommerces, best_distance):
 
     drivers_copy = deepcopy(drivers)
 
@@ -296,28 +307,25 @@ def improve_route(drivers, ecommerces, best_distance):
     while time.time() < t_end:
         try:
             
-            list_take = []
-            for d in drivers:
-                max_dis = 0
-                if d not in list_take and len(list_take) < 5:
-                    if max_dis < distance_driver(d):
-                        list_take.append(d)
-            list_give = []
+            # list_take = []
+            # for d in drivers:
+            #     max_dis = 0
+            #     if d not in list_take and len(list_take) < 5:
+            #         if max_dis < distance_driver(d):
+            #             list_take.append(d)
+            # list_give = []
 
-            for d in drivers:
-                min_dis = 10000
-                if d not in list_give and len(list_give) < 8:
-                    if min_dis > distance_driver(d):
-                        list_give.append(d)
+            # for d in drivers:
+            #     min_dis = 10000
+            #     if d not in list_give and len(list_give) < 8:
+            #         if min_dis > distance_driver(d):
+            #             list_give.append(d)
 
-            driver_give = random.choice(list_give)
-            driver_take = random.choice(list_take)
-            
-
-            # Asegurarse que son distinto drivers
-            while driver_take == driver_give:
-                # driver_take = random.randint(0, len(drivers) - 1)
-                driver_give = random.choice(list_give)
+            # driver_give = random.choice(list_give)
+            # driver_take = random.choice(list_take)
+            drivers = time_drivers(drivers)
+            driver_give = drivers[0]
+            driver_take = drivers[-1]
 
             if len(driver_take.ruta) > 4 and len(driver_give.ruta) <= 8:
                 
@@ -375,8 +383,10 @@ def improve_route(drivers, ecommerces, best_distance):
                     driver_give.ruta = route_give
 
                     new_distance = calculate_distance(drivers)
+                    
 
-                    if new_distance < best_distance:
+                    # if new_distance < best_distance:
+                    if driver_take.tiempo < 90:
                         print('--------------------------')
                         print(f'Mejor distancia ahora {new_distance} antes {best_distance}')
                         print('--------------------------')
@@ -390,11 +400,4 @@ def improve_route(drivers, ecommerces, best_distance):
         except:
             print("El driver ya no tiene ruta")
         
-
-    # # -------- Guardamos ruta en TXT ------------
-    # with open(r'simulation/txt/ruta_ecommerce_mejorada.txt', 'w') as fp:
-    #     for driver in drivers:
-    #         fp.write("%s " % driver.ruta)
-    #         fp.write("\n")
-    
     return drivers

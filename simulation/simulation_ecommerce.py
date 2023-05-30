@@ -4,7 +4,7 @@ import random
 import folium
 from folium.features import DivIcon
 from clases import Driver, Paquete, Ecommerce, Centro
-from funciones import calculate_distance, improve_route_aleatory, map_distance, generate_colors, swap_ecommerce, plot_improvement
+from funciones import calculate_distance, improve_route_aleatory, map_distance, generate_colors, swap_ecommerce, plot_improvement, time_drivers, improve_route_min_max_time
 from Opt2_function import distance_driver, opt2
 
 # ------------- Cargar los datos --------------
@@ -172,6 +172,15 @@ best_distance = calculate_distance(drivers)
 # driver_improve = swap_ecommerce(driver_improve[0], ecommerces, best_distance, driver_improve[3], driver_improve[1], driver_improve[2])
 # plot_improvement(driver_improve[1], driver_improve[2], 'Aleatory improvement and Swap', driver_improve[3])
 
+# --------------------------------------------------------------------------------------
+#                  DRIVER IMPROVE CHOOSING DRIVERS WITH MORE AND LESS TIME
+
+# drivers = driver
+driver_improve = improve_route_min_max_time(drivers, ecommerces, best_distance)
+best_distance = calculate_distance(driver_improve)
+print(f'BEST DISTANCE = {best_distance}')
+for d in drivers:
+    print(f'{d.id} ---- tiempo {d.tiempo}')
 
 
 
