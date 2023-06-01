@@ -74,7 +74,7 @@ def improve_route_aleatory(drivers, ecommerces, best_distance):
 
     drivers_copy = deepcopy(drivers)
 
-    t_end = time.time() + 60 * 1
+    t_end = time.time() + 60 * 0.1
 
     while time.time() < t_end:
         try:
@@ -298,20 +298,40 @@ def time_drivers(drivers):
     drivers.sort(key=lambda x: x.tiempo)
     return drivers
 
+
+def best_removal(driver):
+    original_distance = distance_driver(driver)
+    original_route = deepcopy(driver.ruta)
+    best_diference_length = 0
+
+    for k in range(1, len(driver.ruta)-1):
+        driver.ruta.pop(k)
+        new_distance = distance_driver(driver)
+        new_diference_length = original_distance - new_distance
+        if (new_diference_length > best_diference_length):
+            best_diference_length = new_diference_length
+            best_removal = k
+            value_return = original_route[k]
+        driver.ruta = deepcopy(original_route)
+    driver.ruta.pop(best_removal)
+
+    return value_return
+
+
 def improve_route_min_max_time(drivers, ecommerces, best_distance):
 
     drivers_copy = deepcopy(drivers)
 
-    t_end = time.time() + 60 * 1.5
+    t_end = time.time() + 60 * 2
 
     while time.time() < t_end:
         try:
             
             drivers = time_drivers(drivers)
-            driver_give = drivers[0]
-            driver_take = drivers[-1]
+            driver_give = drivers[-1]
+            driver_take = drivers[0]
 
-            if len(driver_take.ruta) > 4 and len(driver_give.ruta) <= 8:
+            if len(driver_take.ruta) >= 4 and len(driver_give.ruta) <= 10:
                 
                 # Posicion que se cambia
                 pos_change = random.randint(1, len(driver_take.ruta) - 2)
@@ -381,8 +401,6 @@ def improve_route_min_max_time(drivers, ecommerces, best_distance):
                         driver_give.tiempo += random.randint(8, 15)
                     tiempo_recoleccion = (dis/50)*60
                     driver_give.tiempo += tiempo_recoleccion
-                    
-
                     # if new_distance < best_distance:
                     if driver_take.tiempo < 90:
                         print('--------------------------')
