@@ -299,7 +299,7 @@ def time_drivers(drivers):
     return drivers
 
 
-def best_removal(driver):
+def best_removal(driver, ecommerces):
     original_distance = distance_driver(driver)
     original_route = deepcopy(driver.ruta)
     best_diference_length = 0
@@ -313,10 +313,15 @@ def best_removal(driver):
             best_removal = k
             value_return = original_route[k]
         driver.ruta = deepcopy(original_route)
+    
+    for e in ecommerces:
+        if e.ubicacion == value_return:
+            weight = e.peso
+            volume = e.volumen
     driver.ruta.pop(best_removal)
     driver.ruta = opt2(driver.ruta)
 
-    return value_return
+    return value_return, weight, volume
 
 
 def best_insert(drivers, driver, new_point):
@@ -340,7 +345,7 @@ def improve_route_min_max_time(drivers, ecommerces, best_distance):
 
     drivers_copy = deepcopy(drivers)
 
-    t_end = time.time() + 60 * 2
+    t_end = time.time() + 60 * 0.05
 
     while time.time() < t_end:
         try:
