@@ -321,6 +321,7 @@ def best_removal(driver, ecommerces):
     driver.ruta.pop(best_removal)
     driver.peso -= weight
     driver.volumen -= volume
+    driver.tiempo -= random.randint(8, 15)
     driver.ruta = opt2(driver.ruta)
 
     return value_return, weight, volume
@@ -328,123 +329,53 @@ def best_removal(driver, ecommerces):
 
 def best_insert(drivers, driver, new_point, weigth, volume):
     min_increment_distance = float('inf')
-    for d in drivers:
-        new_weigth = 0
-        new_volume = 0
-        if d != driver:
-            new_weigth = d.peso + weigth
-            new_volume = d.volumen + volume
-            if new_weigth < 450 and new_volume < 2:
-                original_distance = distance_driver(d)
-                d.ruta.insert(-1, new_point)
-                d.ruta = opt2(d.ruta)
-                new_distance = distance_driver(d)
-                difference_distance = new_distance - original_distance
-                if(difference_distance < min_increment_distance):
-                    min_increment_distance = difference_distance
-                    best_driver = d
-                d.ruta.remove(new_point)
-    
-    best_driver.ruta.insert(-1, new_point)
-    best_driver.ruta = opt2(best_driver.ruta)
-    best_driver.peso += weigth
-    best_driver.volumen += volume
+    best_list = []
+    while len(best_list) < 4:
+        for d in drivers:
+            new_weigth = 0
+            new_volume = 0
+            if d != driver and d not in best_list:
+                new_weigth = d.peso + weigth
+                new_volume = d.volumen + volume
+                if new_weigth < 450 and new_volume < 2 and len(d.ruta) < 9:
+                    original_distance = distance_driver(d)
+                    d.ruta.insert(-1, new_point)
+                    d.ruta = opt2(d.ruta)
+                    new_distance = distance_driver(d)
+                    difference_distance = new_distance - original_distance
+                    if(difference_distance < min_increment_distance):
+                        dis = difference_distance - min_increment_distance
+                        min_increment_distance = difference_distance
+                        best_driver = d
+                        
+                    d.ruta.remove(new_point)
+                
+                best_list.append(best_driver)
+
+    driver_take = random.choice(best_list)
+    driver_take.ruta.insert(-1, new_point)
+    driver_take.ruta = opt2(driver_take.ruta)
+    driver_take.peso += weigth
+    driver_take.volumen += volume
+    driver_take.tiempo += random.randint(8, 15)
+
+    return driver_take
 
 
 def improve_route_min_max_time(drivers, ecommerces, best_distance):
 
-    drivers_copy = deepcopy(drivers)
-
-    t_end = time.time() + 60 * 0.05
+    t_end = time.time() + 60 * 2
 
     while time.time() < t_end:
         try:
             
             drivers = time_drivers(drivers)
             driver_give = drivers[-1]
-            driver_take = drivers[0]
 
-            if len(driver_take.ruta) >= 4 and len(driver_give.ruta) <= 10:
+            if len(driver_give.ruta) >= 4:
                 
-                # Posicion que se cambia
-                pos_change = random.randint(1, len(driver_take.ruta) - 2)
-                
-                # Guardo el punto a cambiar, lo elimino de un driver y lo inserto en otro
-                value_change = driver_take.ruta[pos_change]
-                driver_give.ruta.insert(-1, value_change)
-                driver_take.ruta.pop(pos_change)
-                
-
-                # Entrega nuevas listas con la minima distancia
-                bodega = driver_take.ruta[-1]
-                driver_take_coor = driver_take.ruta[0]
-                driver_give_coor = driver_give.ruta[0]
-
-
-                # Actualizo peso y dimension de cada driver
-                for e in ecommerces:
-                    if e.ubicacion == value_change:
-                        peso_change = e.peso
-                        volumen_change = e.volumen
-                driver_take.peso -= peso_change
-                driver_take.volumen -= volumen_change
-                driver_give.peso += peso_change
-                driver_give.volumen += volumen_change
-                
-                if driver_give.peso < 450 and driver_give.volumen < 2 and driver_take.peso < 450 and driver_take.volumen < 2:
-
-                    # Revisar nueva ruta para el driver que se le quita un ecommerce
-                    if len(driver_take.ruta) > 2:
-                        route_take = min_route(driver_take.ruta[1:-1], driver_take)
-                        # Agregamos la direccion del driver y bodega
-                        driver_take.ruta = route_take
-                        driver_take.ruta.insert(0, driver_take_coor)
-                        driver_take.ruta.append(bodega)
-                        
-                    else:
-                        route_take = driver_take.ruta
-                    
-                    # Revisar nueva ruta para el driver que se le da un ecommerce
-                    if len(driver_give.ruta) > 2: 
-                        route_give = min_route(driver_give.ruta[1:-1], driver_give)
-                        driver_give.ruta = route_give
-                        driver_give.ruta.insert(0, driver_give_coor)
-                        driver_give.ruta.append(bodega)
-                    else:
-                        route_give = driver_give.ruta
-
-                    # Cambio las lista por las nuevas y elimino las viejas
-                    driver_take.ruta = route_take
-                    driver_give.ruta = route_give
-
-                    new_distance = calculate_distance(drivers)
-
-                    # Nuevo tiempo driver take
-                    dis = distance_driver(driver_take)
-                    driver_take.tiempo = 0
-                    for k in range(len(driver_take.ruta) - 2):
-                        driver_take.tiempo += random.randint(8, 15)
-                    tiempo_recoleccion = (dis/50)*60
-                    driver_take.tiempo += tiempo_recoleccion
-
-                    # Nuevo tiempo driver give
-                    dis = distance_driver(driver_give)
-                    driver_give.tiempo = 0
-                    for k in range(len(driver_give.ruta) - 2):
-                        driver_give.tiempo += random.randint(8, 15)
-                    tiempo_recoleccion = (dis/50)*60
-                    driver_give.tiempo += tiempo_recoleccion
-                    # if new_distance < best_distance:
-                    if driver_take.tiempo < 90:
-                        print('--------------------------')
-                        print(f'Mejor distancia ahora {new_distance} antes {best_distance}')
-                        print('--------------------------')
-                        best_distance = new_distance
-                        drivers_copy = deepcopy(drivers)
-                    else:
-                        drivers = deepcopy(drivers_copy)
-                # else:
-                #     print('No cumple condicion de Peso o Dimension')
+                pos, weight, volume = best_removal(driver_give, ecommerces)
+                driver_take = best_insert(drivers, driver_give, pos, weight, volume)
 
         except:
             print("El driver ya no tiene ruta")
