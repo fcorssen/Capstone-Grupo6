@@ -319,26 +319,36 @@ def best_removal(driver, ecommerces):
             weight = e.peso
             volume = e.volumen
     driver.ruta.pop(best_removal)
+    driver.peso -= weight
+    driver.volumen -= volume
     driver.ruta = opt2(driver.ruta)
 
     return value_return, weight, volume
 
 
-def best_insert(drivers, driver, new_point):
+def best_insert(drivers, driver, new_point, weigth, volume):
     min_increment_distance = float('inf')
     for d in drivers:
+        new_weigth = 0
+        new_volume = 0
         if d != driver:
-            original_distance = distance_driver(d)
-            d.ruta.insert(-1, new_point)
-            d.ruta = opt2(d.ruta)
-            new_distance = distance_driver(d)
-            difference_distance = new_distance - original_distance
-            if(difference_distance < min_increment_distance):
-                min_increment_distance = difference_distance
-                best_driver = d
-            d.ruta.remove(new_point)
+            new_weigth = d.peso + weigth
+            new_volume = d.volumen + volume
+            if new_weigth < 450 and new_volume < 2:
+                original_distance = distance_driver(d)
+                d.ruta.insert(-1, new_point)
+                d.ruta = opt2(d.ruta)
+                new_distance = distance_driver(d)
+                difference_distance = new_distance - original_distance
+                if(difference_distance < min_increment_distance):
+                    min_increment_distance = difference_distance
+                    best_driver = d
+                d.ruta.remove(new_point)
+    
     best_driver.ruta.insert(-1, new_point)
     best_driver.ruta = opt2(best_driver.ruta)
+    best_driver.peso += weigth
+    best_driver.volumen += volume
 
 
 def improve_route_min_max_time(drivers, ecommerces, best_distance):
