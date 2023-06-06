@@ -1,10 +1,15 @@
 import pandas as pd
 import random
 import geopy.distance
+import math
+
 from clases import Driver, Paquete, Ecommerce, Centro
 
 import gurobipy as gp
 from gurobipy import GRB
+
+import networkx as nx
+import matplotlib.pyplot as plt
 
 from funciones import calculate_distance, time_drivers, map_distance
 from Opt2_function import opt2, distance_driver
@@ -144,14 +149,53 @@ for i in range(len(lista_drivers)):
     lista_drivers[i].ruta.insert(0, lista_drivers[i].origen)
 
 print()
+print(lista_drivers[5].ruta)
+print()
+n = len(lista_drivers[5].ruta)
+G = nx.complete_graph(n, nx.DiGraph())
 
-for d in lista_drivers:
-    d.ruta = opt2(d.ruta)
+my_pos = { i : ( lista_drivers[5].ruta[i][0], lista_drivers[5].ruta[i][1] ) for i in G.nodes } 
 
-lista_drivers = time_drivers(lista_drivers)
-for d in lista_drivers:
-    dis = distance_driver(d)
-    print(f'Distancia {dis} ---- Tiempo {d.tiempo} ---- N Paquetes {len(d.ruta) - 2}')
+for i,j in G.edges:
+    (x1,y1) = my_pos[i]
+    (x2,y2) = my_pos[j]
+    G.edges[i,j]['length'] = math.sqrt( (x1-x2)**2 + (y1-y2)**2 )
 
 
-map_distance(lista_drivers, 'simulation/maps/asignacionGurobi.html')
+m = gp.Model()
+x = m.addVars(G.edges,vtype=GRB.BINARY)
+
+m.setObjective( gp.quicksum( G.edges[i,j]['length'] * x[i,j] for i,j in G.edges ), GRB.MINIMIZE )
+
+# Enter each city once
+m.addConstrs( gp.quicksum( x[i,j] for i in G.predecessors(j) ) == 1 for j in G.nodes if j != 0)
+m.addConstrs( gp.quicksum( x[i,j] for i in G.predecessors(j) ) == 0 for j in G.nodes if j == 0)
+
+# Leave each city once
+m.addConstrs( gp.quicksum( x[i,j] for j in G.successors(i) ) == 1 for i in G.nodes if i != n-1)
+m.addConstrs( gp.quicksum( x[i,j] for j in G.successors(i) ) == 0 for i in G.nodes if i == n-1)
+
+u = m.addVars( G.nodes )
+
+m.addConstrs( u[i] - u[j] + (n-1) * x[i,j] + (n-3) * x[j,i] <= n-2 for i,j in G.edges if j != 0 if (i,j) in G.edges)
+
+m.optimize()
+
+tour_edges = [ e for e in G.edges if x[e].x > 0.5 ]
+nx.draw(G.edge_subgraph(tour_edges), pos=my_pos)
+plt.show()
+
+
+
+# print()
+
+# for d in lista_drivers:
+#     d.ruta = opt2(d.ruta)
+
+# lista_drivers = time_drivers(lista_drivers)
+# for d in lista_drivers:
+#     dis = distance_driver(d)
+#     print(f'Distancia {dis} ---- Tiempo {d.tiempo} ---- N Paquetes {len(d.ruta) - 2}')
+
+
+# map_distance(lista_drivers, 'simulation/maps/asignacionGurobi.html')
