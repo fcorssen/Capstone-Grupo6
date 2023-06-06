@@ -108,7 +108,7 @@ def best_removal(driver, ecommerces):
     driver.peso -= weight
     driver.volumen -= volume
     driver.tiempo -= random.randint(8, 15)
-    driver.ruta = min_distance_gurobi(driver)
+    min_distance_gurobi(driver)
 
     return value_return, weight, volume
 
@@ -146,6 +146,19 @@ def best_insert(drivers, driver, new_point, weigth, volume):
     driver_take.tiempo += random.randint(8, 15)
 
 
+def have_time(drivers, ecommerces):
+    driver_yes = drivers[0]
+    driver_no = drivers[-1]
+
+    new_point, weight, volume = best_removal(driver_no, ecommerces)
+    min_distance_gurobi(driver_no)
+    driver_yes.ruta.insert(-1, new_point)
+    driver_yes.peso += weight
+    driver_yes.volumen += volume
+    min_distance_gurobi(driver_yes)
+
+
+
 def improve_route_min_max_time(drivers, ecommerces):
 
     t_end = time.time() + 60
@@ -160,6 +173,22 @@ def improve_route_min_max_time(drivers, ecommerces):
                 
                 pos, weight, volume = best_removal(driver_give, ecommerces)
                 best_insert(drivers, driver_give, pos, weight, volume)
+
+        except:
+            print("El driver ya no tiene ruta")
+        
+    return drivers
+
+
+def improve_have_time(drivers, ecommerces):
+
+    t_end = time.time() + 60*0.2
+
+    while time.time() < t_end:
+        try:
+
+            drivers = time_drivers(drivers)
+            have_time(drivers, ecommerces)
 
         except:
             print("El driver ya no tiene ruta")
