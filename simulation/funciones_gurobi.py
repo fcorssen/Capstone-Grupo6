@@ -1,6 +1,8 @@
 import math
 import geopy.distance
 import random
+import time
+import numpy as np
 from copy import deepcopy
 
 import gurobipy as gp
@@ -75,7 +77,7 @@ def time_drivers(drivers):
         dis = distance_driver(d)
         d.tiempo = 0
         for k in range(len(d.ruta) - 2):
-            d.tiempo += random.randint(8, 15)
+            d.tiempo += np.random.uniform(8, 15)
         tiempo_recoleccion = (dis/50)*60
         d.tiempo += tiempo_recoleccion
     drivers.sort(key=lambda x: x.tiempo)
@@ -83,8 +85,6 @@ def time_drivers(drivers):
 
 
 def best_removal(driver, ecommerces):
-    print()
-    print(111111, driver.ruta)
     original_distance = distance_driver(driver)
     original_route = deepcopy(driver.ruta)
     best_diference_length = 0
@@ -105,9 +105,6 @@ def best_removal(driver, ecommerces):
             weight = e.peso
             volume = e.volumen
     driver.ruta.pop(best_removal)
-    print()
-    print(f'Se ha eliminado {value_return}')
-    print()
     driver.peso -= weight
     driver.volumen -= volume
     driver.tiempo -= random.randint(8, 15)
@@ -144,9 +141,27 @@ def best_insert(drivers, driver, new_point, weigth, volume):
     driver_take = random.choice(best_list)
     driver_take.ruta.insert(-1, new_point)
     min_distance_gurobi(driver_take)
-    print()
-    print(f'Al driver {driver_take.id} se le ha agrego {new_point} y la distancia aumento en {min_increment_distance}')
-    print()
     driver_take.peso += weigth
     driver_take.volumen += volume
     driver_take.tiempo += random.randint(8, 15)
+
+
+def improve_route_min_max_time(drivers, ecommerces):
+
+    t_end = time.time() + 60
+
+    while time.time() < t_end:
+        try:
+            
+            drivers = time_drivers(drivers)
+            driver_give = drivers[-1]
+
+            if len(driver_give.ruta) >= 4:
+                
+                pos, weight, volume = best_removal(driver_give, ecommerces)
+                best_insert(drivers, driver_give, pos, weight, volume)
+
+        except:
+            print("El driver ya no tiene ruta")
+        
+    return drivers

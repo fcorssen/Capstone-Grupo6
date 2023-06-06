@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 from funciones import calculate_distance, time_drivers, map_distance
 from Opt2_function import opt2, distance_driver
-from funciones_gurobi import min_distance_gurobi, best_insert, best_removal
+from funciones_gurobi import min_distance_gurobi, best_insert, best_removal, improve_route_min_max_time
 
 # ------------- Cargar los datos --------------
 
@@ -154,17 +154,17 @@ for d in lista_drivers:
     
 lista_drivers = time_drivers(lista_drivers)
 
-
+lista_drivers = improve_route_min_max_time(lista_drivers, list_ecommerces, )
 
 
 # print()
 # print(f'La nueva distancia minima es {calculate_distance(lista_drivers)}')
 # print()
 
-# lista_drivers = time_drivers(lista_drivers)
-# for d in lista_drivers:
-#     dis = distance_driver(d)
-#     print(f'Distancia {dis} ---- Tiempo {d.tiempo} ---- N Paquetes {len(d.ruta) - 2} ---- Peso {d.peso} ---- Dimensiones {d.volumen}')
+lista_drivers = time_drivers(lista_drivers)
+for d in lista_drivers:
+    dis = distance_driver(d)
+    print(f'Distancia {dis} ---- Tiempo {d.tiempo} ---- N Paquetes {len(d.ruta) - 2} ---- Peso {d.peso} ---- Dimensiones {d.volumen}')
 
 
 # map_distance(lista_drivers, 'simulation/maps/asignacionGurobi.html')
