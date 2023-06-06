@@ -67,6 +67,7 @@ for pos_driver in list_drivers:
 WMAX = 450  # peso maximo por conductor
 VMAX = 2  # volumen maximo por conductor
 NMIN = 4   # paquetes minimos
+NMAX = 8   # paquetes maximos
 
 
 ## No tocar ##
@@ -77,7 +78,8 @@ x = model.addVars(drivers, puntos, vtype=GRB.BINARY)
 for k in drivers:
     model.addConstr(gp.quicksum(x[k, i] * volumen_total_punto[i] for i in puntos) <= VMAX)
     model.addConstr(gp.quicksum(x[k, i] * peso_total_punto[i] for i in puntos) <= WMAX)
-    model.addConstr(gp.quicksum(x[k, i] for i in puntos) >= 0)
+    model.addConstr(gp.quicksum(x[k, i] for i in puntos) >= NMIN)
+    model.addConstr(gp.quicksum(x[k, i] for i in puntos) <= NMAX)
 
 for i in puntos:
     model.addConstr(gp.quicksum(x[k, i] for k in drivers) == 1)
