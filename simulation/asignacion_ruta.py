@@ -148,9 +148,7 @@ for i in range(len(lista_drivers)):
     lista_drivers[i].ruta.append(lista_centros[-1].ubicacion)
     lista_drivers[i].ruta.insert(0, lista_drivers[i].origen)
 
-print()
-print(lista_drivers[5].ruta)
-print()
+
 n = len(lista_drivers[5].ruta)
 G = nx.complete_graph(n, nx.DiGraph())
 
@@ -167,11 +165,11 @@ x = m.addVars(G.edges,vtype=GRB.BINARY)
 
 m.setObjective( gp.quicksum( G.edges[i,j]['length'] * x[i,j] for i,j in G.edges ), GRB.MINIMIZE )
 
-# Enter each city once
+# Entrar a cada ciudad una vez excepto la primera
 m.addConstrs( gp.quicksum( x[i,j] for i in G.predecessors(j) ) == 1 for j in G.nodes if j != 0)
 m.addConstrs( gp.quicksum( x[i,j] for i in G.predecessors(j) ) == 0 for j in G.nodes if j == 0)
 
-# Leave each city once
+# Salir de cada ciudad una vez excepto la ultima
 m.addConstrs( gp.quicksum( x[i,j] for j in G.successors(i) ) == 1 for i in G.nodes if i != n-1)
 m.addConstrs( gp.quicksum( x[i,j] for j in G.successors(i) ) == 0 for i in G.nodes if i == n-1)
 
@@ -182,8 +180,25 @@ m.addConstrs( u[i] - u[j] + (n-1) * x[i,j] + (n-3) * x[j,i] <= n-2 for i,j in G.
 m.optimize()
 
 tour_edges = [ e for e in G.edges if x[e].x > 0.5 ]
+print(tour_edges)
 nx.draw(G.edge_subgraph(tour_edges), pos=my_pos)
-plt.show()
+# plt.show()
+
+
+# Obtenemos un orden para la ruta a partir de la min distancia
+order_route = [0]
+value = 0
+while len(order_route) < len(lista_drivers[5].ruta):
+    for e in tour_edges:
+        if e[0] == value:
+            order_route.append(e[1])
+            value = e[1]
+
+new_route = []
+for d in order_route:
+    new_route.append(lista_drivers[5].ruta[d])
+
+
 
 
 
