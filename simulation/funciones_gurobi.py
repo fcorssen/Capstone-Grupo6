@@ -21,6 +21,7 @@ def min_distance_gurobi(d):
     for i,j in G.edges:
         (x1,y1) = my_pos[i]
         (x2,y2) = my_pos[j]
+        # Cambiar distancia en grafo CAMBIAR
         G.edges[i,j]['length'] = math.sqrt( (x1-x2)**2 + (y1-y2)**2 )
 
 
@@ -80,6 +81,10 @@ def time_drivers(drivers):
             d.tiempo += np.random.uniform(8, 15)
         tiempo_recoleccion = (dis/50)*60
         d.tiempo += tiempo_recoleccion
+    drivers.sort(key=lambda x: x.tiempo)
+    return drivers
+
+def order_drivers_time(drivers):
     drivers.sort(key=lambda x: x.tiempo)
     return drivers
 
@@ -147,6 +152,9 @@ def best_insert(drivers, driver, new_point, weigth, volume):
 
 
 def have_time(drivers, ecommerces):
+    order_drivers_time(drivers)
+
+    
     driver_yes = drivers[0]
     driver_no = drivers[-1]
 
@@ -154,6 +162,7 @@ def have_time(drivers, ecommerces):
     min_distance_gurobi(driver_no)
     driver_yes.ruta.insert(-1, new_point)
     driver_yes.peso += weight
+    driver_yes.tiempo += random.randint(8, 15)
     driver_yes.volumen += volume
     min_distance_gurobi(driver_yes)
 
@@ -161,18 +170,19 @@ def have_time(drivers, ecommerces):
 
 def improve_route_min_max_time(drivers, ecommerces):
 
-    t_end = time.time() + 60
+    t_end = time.time() + 60*0.1
 
     while time.time() < t_end:
         try:
             
-            drivers = time_drivers(drivers)
+            # drivers = time_drivers(drivers)
+            drivers = order_drivers_time(drivers)
             driver_give = drivers[-1]
 
             if len(driver_give.ruta) >= 4:
                 
                 pos, weight, volume = best_removal(driver_give, ecommerces)
-                best_insert(drivers, driver_give, pos, weight, volume)
+                best_insert(drivers[0:3], driver_give, pos, weight, volume)
 
         except:
             print("El driver ya no tiene ruta")
@@ -182,12 +192,13 @@ def improve_route_min_max_time(drivers, ecommerces):
 
 def improve_have_time(drivers, ecommerces):
 
-    t_end = time.time() + 60*0.2
+    t_end = time.time() + 60*0.1
 
     while time.time() < t_end:
         try:
 
-            drivers = time_drivers(drivers)
+            # drivers = time_drivers(drivers)
+            drivers = order_drivers_time(drivers)
             have_time(drivers, ecommerces)
 
         except:
