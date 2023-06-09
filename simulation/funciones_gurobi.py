@@ -42,6 +42,9 @@ def min_distance_gurobi(d):
 
     m.addConstrs( u[i] - u[j] + (n-1) * x[i,j] + (n-3) * x[j,i] <= n-2 for i,j in G.edges if j != 0 if (i,j) in G.edges)
 
+    # Agregar GAP de 5%
+    m.setParam('MIPGap', 0.05)
+
     m.optimize()
 
     tour_edges = [ e for e in G.edges if x[e].x > 0.5 ]
