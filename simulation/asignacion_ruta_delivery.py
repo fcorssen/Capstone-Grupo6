@@ -9,9 +9,9 @@ from gurobipy import GRB
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from funciones import calculate_distance, time_drivers, map_distance
+from funciones import calculate_distance, map_distance
 from Opt2_function import opt2, distance_driver
-from funciones_gurobi import min_distance_gurobi, improve_route_min_max_time, improve_have_time, order_drivers_time, have_time
+from funciones_gurobi import min_distance_gurobi, improve_route_min_max_time, improve_have_time, order_drivers_time, have_time, time_drivers_delivery
 
 
 # ------------- Cargar los datos --------------
@@ -65,8 +65,8 @@ for pos_driver in list_drivers:
 
 WMAX = 450  # peso maximo por conductor
 VMAX = 2  # volumen maximo por conductor
-NMIN = 25   # paquetes minimos
-NMAX = 60   # paquetes maximos
+NMIN = 30   # paquetes minimos
+NMAX = 50   # paquetes maximos
 
 
 ## No tocar ##
@@ -137,7 +137,7 @@ for d in lista_drivers:
     min_distance_gurobi(d)
 
 
-# # lista_drivers = improve_route_min_max_time(lista_drivers, list_ecommerces)
+# lista_drivers = improve_route_min_max_time(lista_drivers, lista_paquetes)
 # # lista_drivers = improve_have_time(lista_drivers, list_ecommerces)
 
 # # lista_drivers = time_drivers(lista_drivers)
@@ -150,10 +150,10 @@ for d in lista_drivers:
 # #     d.tiempo += tiempo_recoleccion
 
 # # lista_drivers = order_drivers_time(lista_drivers)
-lista_drivers = time_drivers(lista_drivers)
+lista_drivers = time_drivers_delivery(lista_drivers)
 for d in lista_drivers:
     dis = distance_driver(d)
-    print(f'{d.id} --> Distancia {dis} ---- Tiempo {d.tiempo} ---- N Paquetes {len(d.ruta) - 2} ---- Peso {d.peso} ---- Dimensiones {d.volumen}')
+    print(f'{d.id} --> Distancia {dis} ---- Tiempo {d.tiempo/60} ---- N Paquetes {len(d.ruta) - 2} ---- Peso {d.peso} ---- Dimensiones {d.volumen}')
 
 
 # # print()
