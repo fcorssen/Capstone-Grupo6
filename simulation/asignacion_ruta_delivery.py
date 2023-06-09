@@ -65,8 +65,8 @@ for pos_driver in list_drivers:
 
 WMAX = 450  # peso maximo por conductor
 VMAX = 2  # volumen maximo por conductor
-NMIN = 30   # paquetes minimos
-NMAX = 50   # paquetes maximos
+NMIN = 35   # paquetes minimos
+NMAX = 45   # paquetes maximos
 
 
 ## No tocar ##
