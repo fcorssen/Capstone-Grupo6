@@ -11,6 +11,7 @@ class Driver:
         self.origen = origen
         self.ruta = []
         self.ecommerce = []
+        self.deliveries = []
         self.tiempo = 0
         # self.ubicaion_actual = []
 
@@ -28,6 +29,13 @@ class Driver:
         self.volumen -= ecommerce.volumen
         self.ruta.remove(ecommerce.ubicacion)
         # self.ubicacion_actual = ecommerce.ubicacion
+    
+    def agregar_delivery(self, paquete):
+        self.peso += paquete.peso
+        self.volumen += paquete.volumen
+        self.ruta.append(paquete.ubicacion)
+        self.deliveries.append(paquete)
+        self.tiempo += random.randint(4, 8)
 
 
 class Ecommerce:
@@ -55,14 +63,14 @@ class Ecommerce:
 
 
 class Paquete:
-    def __init__(self, id, peso, destino, x1,x2,x3, delivery_day, ecommerce):
+    def __init__(self, id, peso, ubicacion, x1,x2,x3, delivery_day, ecommerce):
         self.id = id
         self.peso = peso
         self.x1 = x1 / 100
         self.x2 = x2 / 100
         self.x3 = x3 / 100
         self.volumen = self.x1*self.x2*self.x3
-        self.destino = destino
+        self.ubicacion = ubicacion
         self.dia = delivery_day
         self.ecommerce = ecommerce
 
