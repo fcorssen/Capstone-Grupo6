@@ -14,6 +14,14 @@ class Driver:
         self.deliveries = []
         self.tiempo = 0
         # self.ubicaion_actual = []
+    
+    def reset(self):
+        self.peso = 0
+        self.volumen = 0
+        self.ruta = []
+        self.ecommerce = []
+        self.deliveries = []
+        self.tiempo = 0
 
     def agregar_ecommerce(self, ecommerce):
         self.peso += ecommerce.peso

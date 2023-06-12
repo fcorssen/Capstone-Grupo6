@@ -33,17 +33,17 @@ for i in range(30):
     value = days.count(i + 1)
     amountDays.append(value)
 
-df_delivery = df_delivery[:amountDays[0]]
+df_delivery_day = df_delivery[:amountDays[0]]
 
 # Creamos una columna que son las dimensiones en m3
-df_delivery['dimensiones'] = df_delivery['x1 (largo en cm)']/100 * df_delivery['x2 (ancho en cm)']/100 * df_delivery['x3 (alto en cm)']/100 
+df_delivery_day['dimensiones'] = df_delivery_day['x1 (largo en cm)']/100 * df_delivery_day['x2 (ancho en cm)']/100 * df_delivery_day['x3 (alto en cm)']/100 
 
-lista_volumen = df_delivery['dimensiones'].tolist()
-lista_peso = df_delivery['weight (kg)'].tolist()
+lista_volumen = df_delivery_day['dimensiones'].tolist()
+lista_peso = df_delivery_day['weight (kg)'].tolist()
 
 
 # Cantidad de Drivers y Ecommerces
-numero_puntos = df_delivery['longitude'].size
+numero_puntos = df_delivery_day['longitude'].size
 numero_drivers = df_driver['longitude'].size
 
 puntos = range(numero_puntos)
@@ -54,7 +54,7 @@ distancia = []
 
 
 list_drivers = df_driver[['latitude', 'longitude']].values.tolist()
-list_delivery = df_delivery[['latitude', 'longitude']].values.tolist()
+list_delivery = df_delivery_day[['latitude', 'longitude']].values.tolist()
 
 for pos_driver in list_drivers:
     lista_dis = []
@@ -66,7 +66,7 @@ for pos_driver in list_drivers:
 WMAX = 450  # peso maximo por conductor
 VMAX = 2  # volumen maximo por conductor
 NMIN = 35   # paquetes minimos
-NMAX = 45   # paquetes maximos
+NMAX = 50   # paquetes maximos
 
 
 ## No tocar ##
@@ -113,8 +113,8 @@ for i in range(df_ecommerce['id'].size):
 
 # ----------  Instanciar los paquetes ---------- 
 lista_paquetes = []
-for i in range(df_delivery['id'].size):
-    paquete = Paquete(df_delivery['id'].iat[i], df_delivery['weight (kg)'].iat[i], [df_delivery['latitude'].iat[i], df_delivery['longitude'].iat[i]], df_delivery['x1 (largo en cm)'].iat[i], df_delivery['x2 (ancho en cm)'].iat[i], df_delivery['x3 (alto en cm)'].iat[i], df_delivery['delivery_day'].iat[i].day, df_delivery['e-commerce_id'].iat[i])
+for i in range(df_delivery_day['id'].size):
+    paquete = Paquete(df_delivery_day['id'].iat[i], df_delivery_day['weight (kg)'].iat[i], [df_delivery_day['latitude'].iat[i], df_delivery_day['longitude'].iat[i]], df_delivery_day['x1 (largo en cm)'].iat[i], df_delivery_day['x2 (ancho en cm)'].iat[i], df_delivery_day['x3 (alto en cm)'].iat[i], df_delivery_day['delivery_day'].iat[i].day, df_delivery_day['e-commerce_id'].iat[i])
     lista_paquetes.append(paquete)
 
 # ---------- Paquetes dia 1 ----------
@@ -144,10 +144,6 @@ for d in lista_drivers:
 # # lista_drivers = order_drivers_time(lista_drivers)
 # # have_time(lista_drivers, lista_ecommerces)
 
-# # for d in lista_drivers:
-# #     dis = distance_driver(d)
-# #     tiempo_recoleccion = (dis/50)*60
-# #     d.tiempo += tiempo_recoleccion
 
 # # lista_drivers = order_drivers_time(lista_drivers)
 lista_drivers = time_drivers_delivery(lista_drivers)
@@ -156,9 +152,9 @@ for d in lista_drivers:
     print(f'{d.id} --> Distancia {dis} ---- Tiempo {d.tiempo/60} ---- N Paquetes {len(d.ruta) - 2} ---- Peso {d.peso} ---- Dimensiones {d.volumen}')
 
 
-# # print()
-# # print(f'La nueva distancia minima es {calculate_distance(lista_drivers)}')
-# # print()
+# print()
+# print(f'La nueva distancia minima es {calculate_distance(lista_drivers)}')
+# print()
 
 
 map_distance(lista_drivers, 'simulation/maps/asignacionGurobiDeliveries.html')
