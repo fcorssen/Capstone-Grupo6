@@ -132,14 +132,16 @@ def best_removal(driver, ecommerces):
     return value_return, weight, volume
 
 
-def best_insert(drivers, driver, new_point, weigth, volume):
+def best_insert(drivers, new_point, weigth, volume):
     min_increment_distance = float('inf')
     best_list = []
+    best_driver = None
     while len(best_list) < 4:
         for d in drivers:
             new_weigth = 0
             new_volume = 0
-            if d != driver and d not in best_list:
+            # if d != driver and d not in best_list:
+            if d not in best_list:
                 new_weigth = d.peso + weigth
                 new_volume = d.volumen + volume
                 if new_weigth < 450 and new_volume < 2 and len(d.ruta) < 9:
@@ -163,6 +165,39 @@ def best_insert(drivers, driver, new_point, weigth, volume):
     driver_take.peso += weigth
     driver_take.volumen += volume
     driver_take.tiempo += random.randint(8, 15)
+
+    return driver_take
+
+
+def remove_until_time(drivers, ecommerces):
+    drivers = order_drivers_time(drivers)
+    not_asign_list = []
+    for d in drivers:
+        if d.tiempo > 90:
+            while d.tiempo > 90:
+                point, weight, volume = best_removal(d, ecommerces)
+                not_asign_list.append([point, weight, volume])
+    return not_asign_list
+
+
+def insert_if_time(drivers, not_asign_list):
+    lista_driver = deepcopy(drivers)
+    no_insert = []
+    # for i in range(4):
+    #     if len(not_asign_list) > 0:
+    for new_point, weigth, volume in not_asign_list:
+        driver_take = best_insert(drivers, new_point, weigth, volume)
+        if driver_take.tiempo > 100:
+            drivers = deepcopy(lista_driver)
+            no_insert.append([new_point, weigth, volume])
+            driver_take.peso -= weigth
+            driver_take.volumen -= volume
+            driver_take.tiempo -= random.randint(8, 15)
+            min_distance_gurobi(driver_take)
+        else:
+            lista_driver = deepcopy(drivers)
+    
+    return no_insert
 
 
 def have_time(drivers, ecommerces):
