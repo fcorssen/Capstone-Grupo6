@@ -82,7 +82,7 @@ def time_drivers(drivers):
         d.tiempo = 0
         for k in range(len(d.ruta) - 2):
             d.tiempo += np.random.uniform(8, 15)
-        tiempo_recoleccion = (dis/50)*60
+        tiempo_recoleccion = (dis/30)*60
         d.tiempo += tiempo_recoleccion
     drivers.sort(key=lambda x: x.tiempo)
     return drivers
@@ -203,7 +203,7 @@ def insert_if_time(drivers, not_asign_list):
 
 
 def remove_insert_if_time(drivers, ecommerces):
-    for i in range(10):
+    for i in range(4):
         lista_drivers = time_drivers(drivers)
         not_asign_list = remove_until_time(lista_drivers, ecommerces)
         if len(not_asign_list) > 0:
@@ -213,19 +213,23 @@ def remove_insert_if_time(drivers, ecommerces):
     return lista_no
 
 def have_time(drivers, ecommerces):
-    order_drivers_time(drivers)
 
-    
-    driver_yes = drivers[0]
-    driver_no = drivers[-1]
+    for i in range(5):
 
-    new_point, weight, volume = best_removal(driver_no, ecommerces)
-    min_distance_gurobi(driver_no)
-    driver_yes.ruta.insert(-1, new_point)
-    driver_yes.peso += weight
-    driver_yes.tiempo += random.randint(8, 15)
-    driver_yes.volumen += volume
-    min_distance_gurobi(driver_yes)
+        order_drivers_time(drivers)
+        
+        driver_yes = drivers[0]
+        driver_no = drivers[-1]
+        if driver_no.tiempo > 90:
+            new_point, weight, volume = best_removal(driver_no, ecommerces)
+            min_distance_gurobi(driver_no)
+            driver_yes.ruta.insert(-1, new_point)
+            driver_yes.peso += weight
+            driver_yes.tiempo += random.randint(8, 15)
+            driver_yes.volumen += volume
+            min_distance_gurobi(driver_yes)
+        else:
+            break
 
 
 
