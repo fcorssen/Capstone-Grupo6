@@ -160,6 +160,9 @@ for d in lista_drivers:
 
 
 lista_no = remove_insert_if_time(lista_drivers, lista_ecommerces)
+print()
+print(lista_no, print(len(lista_no)))
+print()
 
 # have_time(lista_drivers, lista_ecommerces)
 
