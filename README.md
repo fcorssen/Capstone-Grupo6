@@ -11,6 +11,12 @@ H_1750_65 = np.array([44, 42, 38, 32, 24, 14])  # Altura en pies
 # Bomba a 3500 RPM con impulsor de 6"
 Q_3500_60 = np.array([0, 50, 100, 150, 200, 250])  # Caudal en GPM
 H_3500_60 = np.array([68, 65, 60, 53, 44, 34])  # Altura en pies
+# Curva combinada de bombas en paralelo (misma cabeza, sumar caudales)
+Q_paralelo = 2 * Q_1750_65  # Doble caudal para la misma cabeza
+H_paralelo = H_1750_65  # Misma altura porque las bombas son iguales
+
+# Suma directa de alturas para bomba en serie con bombas en paralelo
+H_compuesta = H_paralelo + H_3500_60[:len(H_paralelo)]  # Asegurarse de que las longitudes coincidan
 # graficar
 plt.figure(figsize=(12, 8))
 plt.plot(Q_1750_65, H_1750_65, 'bo-', label='Bomba Individual a 1750 RPM, 6.5" Impulsor')
